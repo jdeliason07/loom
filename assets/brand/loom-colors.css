@@ -1,0 +1,50 @@
+/* ============================================================
+   LOOM — Color System
+   ============================================================ */
+:root {
+  --loom-void:      #14171A; /* primary dark background */
+  --loom-graphite:  #2E3237; /* secondary dark surface / text on light */
+  --loom-slate:     #454C54; /* secondary text, borders on dark */
+  --loom-steel:     #7C8590; /* muted text, captions, disabled states */
+  --loom-silver:    #B8BFC8; /* borders / icon ink on dark */
+  --loom-platinum:  #E4E7EA; /* light surfaces, dividers */
+  --loom-paper:     #FAFAFA; /* primary light background */
+  --loom-signal:    #5C6773; /* links, focus rings — use sparingly */
+
+  --loom-accent-blue:     #2E86FF;
+  --loom-accent-emerald:  #00D9A0;
+  --loom-accent-gold:     #FFD500;
+  --loom-accent-orange:   #FF5C00;
+  --loom-accent-magenta:  #E000B8;
+  --loom-accent-violet:   #7A2DE0;
+
+  --loom-gradient-primary: linear-gradient(135deg,
+    var(--loom-accent-blue) 0%, var(--loom-accent-emerald) 20%,
+    var(--loom-accent-gold) 40%, var(--loom-accent-orange) 60%,
+    var(--loom-accent-magenta) 80%, var(--loom-accent-violet) 100%);
+
+  --loom-gradient-subtle: linear-gradient(135deg,
+    color-mix(in srgb, var(--loom-accent-blue) 35%, var(--loom-void)) 0%,
+    color-mix(in srgb, var(--loom-accent-violet) 35%, var(--loom-void)) 100%);
+
+  --color-bg:             var(--loom-void);
+  --color-bg-elevated:    var(--loom-graphite);
+  --color-surface:        var(--loom-platinum);
+  --color-text-primary:   var(--loom-paper);
+  --color-text-secondary: var(--loom-silver);
+  --color-text-muted:     var(--loom-steel);
+  --color-border:         var(--loom-slate);
+  --color-link:           var(--loom-signal);
+  --color-accent:         var(--loom-accent-blue);
+}
+[data-theme="light"] {
+  --color-bg: var(--loom-paper); --color-bg-elevated: var(--loom-platinum);
+  --color-surface: var(--loom-graphite); --color-text-primary: var(--loom-graphite);
+  --color-text-secondary: var(--loom-slate); --color-text-muted: var(--loom-steel);
+  --color-border: var(--loom-platinum);
+}
+.loom-gradient-text {
+  background: var(--loom-gradient-primary); background-clip: text;
+  -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+}
+.loom-gradient-bg { background: var(--loom-gradient-primary); }

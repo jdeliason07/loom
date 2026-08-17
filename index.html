@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>loom — No. 01</title>
+<meta name="description" content="No. 01 — a one-piece borosilicate glass bottle with a machined steel cap. Simply essential. $99.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#14171A">
+
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/brand/loom-colors.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="wordmark wordmark--flat" href="#top" aria-label="loom — home">loom</a>
+
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#ethos">Ethos</a>
+      <a href="#product">The bottle</a>
+    </nav>
+
+    <button type="button" class="cart-button" id="cart-button" aria-haspopup="dialog" aria-controls="order-drawer">
+      <span class="cart-button__label">Order</span>
+      <span class="cart-button__count" id="cart-count" data-empty="true">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ── 1. Hero ─────────────────────────────────────────────── -->
+  <section class="hero" id="top">
+    <div class="hero__media" aria-hidden="true">
+      <!--
+        Static backdrop. When footage exists, replace the <img> below with:
+
+        <video class="hero__media-el" autoplay muted loop playsinline
+               poster="assets/img/hero-still.svg">
+          <source src="assets/video/hero.webm" type="video/webm">
+          <source src="assets/video/hero.mp4"  type="video/mp4">
+        </video>
+
+        Nothing else needs to change — .hero__media-el covers the layer.
+      -->
+      <img class="hero__media-el" src="assets/img/hero-still.svg" alt="">
+      <div class="hero__scrim"></div>
+    </div>
+
+    <div class="hero__content">
+      <h1 class="wordmark wordmark--hero loom-gradient-text">loom</h1>
+      <p class="hero__tagline">For the creators of the world.</p>
+    </div>
+
+    <a class="hero__cue" href="#ethos" aria-label="Scroll to Ethos">
+      <span class="hero__cue-line" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <!-- ── 2. Ethos ────────────────────────────────────────────── -->
+  <section class="section section--ethos" id="ethos">
+    <div class="container">
+      <p class="label">01 — Ethos</p>
+      <h2 class="section__headline">For the creators of the world</h2>
+
+      <div class="ethos__grid">
+        <article class="ethos__column">
+          <h3 class="label label--column">Vision</h3>
+          <p>A generation that builds on its own terms, unslowed by the objects it carries.</p>
+        </article>
+        <article class="ethos__column">
+          <h3 class="label label--column">Mission</h3>
+          <p>Make daily objects precise enough to disappear and honest enough to last — so the person carrying one spends their attention on the work, the road, and the risk.</p>
+        </article>
+      </div>
+
+      <p class="ethos__close">Not on the gear.</p>
+    </div>
+  </section>
+
+  <!-- ── 3. Product ──────────────────────────────────────────── -->
+  <section class="section section--product" id="product">
+    <div class="container">
+      <p class="label">02 — The bottle</p>
+
+      <div class="product__grid">
+        <div class="product__media">
+          <figure class="product__figure">
+            <div class="product__stage">
+              <img src="assets/img/no-01.svg" alt="No. 01 — a one-piece borosilicate glass bottle with a machined steel cap." width="480" height="1120">
+            </div>
+            <figcaption class="product__caption">
+              Shot: no. 01, studio. Light: 5600K, single hard key. Treatment: no color grade, no flare.
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="product__detail">
+          <h2 class="product__title">No. 01</h2>
+          <p class="product__lead">Simply essential.</p>
+          <p class="product__price">$99</p>
+
+          <form class="purchase" id="purchase-form">
+            <div class="stepper" role="group" aria-label="Quantity">
+              <button type="button" class="stepper__btn" data-step="-1" aria-label="Decrease quantity">−</button>
+              <input class="stepper__input" id="qty" name="qty" type="number"
+                     value="1" min="1" max="10" step="1" inputmode="numeric" aria-label="Quantity">
+              <button type="button" class="stepper__btn" data-step="1" aria-label="Increase quantity">+</button>
+            </div>
+            <button type="submit" class="btn btn--primary">Purchase</button>
+          </form>
+
+          <dl class="specs">
+            <div class="specs__row"><dt>Glass</dt><dd>Borosilicate, hand-formed</dd></div>
+            <div class="specs__row"><dt>Volume</dt><dd>1 L</dd></div>
+            <div class="specs__row"><dt>Weight</dt><dd>1.4 kg, filled</dd></div>
+            <div class="specs__row"><dt>Closure</dt><dd>Steel cap, machined, closes on the third turn</dd></div>
+            <div class="specs__row"><dt>Release</dt><dd>Open, numbered by hand</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. In the box ───────────────────────────────────────── -->
+  <section class="section section--insert" id="in-the-box">
+    <div class="container">
+      <div class="insert">
+        <p class="label">03 — In the box</p>
+        <h2 class="insert__headline">This is the whole product</h2>
+        <div class="insert__copy">
+          <p>Borosilicate glass, formed in one piece. A steel cap machined to close on the third turn. No coating, no liner, no insert, no card after this one.</p>
+          <p>Wash it by hand. It will outlast the phone you're holding.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── 5. Footer ─────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="wordmark wordmark--flat wordmark--footer">loom</p>
+    <p class="site-footer__tagline">For the creators of the world.</p>
+    <p class="site-footer__close">Wash it by hand. It will outlast the phone you're holding.</p>
+    <p class="site-footer__meta">© <span id="year">2026</span> loom — No. 01, open release, numbered by hand.</p>
+  </div>
+</footer>
+
+<!-- ── Order drawer ──────────────────────────────────────────── -->
+<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+
+<aside class="drawer" id="order-drawer" role="dialog" aria-modal="true"
+       aria-labelledby="drawer-title" hidden>
+  <div class="drawer__head">
+    <h2 class="drawer__title" id="drawer-title">Your order</h2>
+    <button type="button" class="drawer__close" id="drawer-close" aria-label="Close order drawer">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none"
+           stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <path d="M6 6l12 12M18 6L6 18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="drawer__body" id="drawer-body">
+    <p class="drawer__empty" id="drawer-empty">Nothing here yet.</p>
+    <ul class="line-items" id="line-items"></ul>
+  </div>
+
+  <div class="drawer__foot">
+    <div class="drawer__total">
+      <span class="label">Total</span>
+      <span class="drawer__total-value" id="drawer-total" aria-live="polite">$0</span>
+    </div>
+    <button type="button" class="btn btn--primary btn--block" id="checkout" disabled>Checkout</button>
+    <p class="drawer__notice" id="drawer-notice" role="status" hidden></p>
+    <p class="drawer__fineprint">Demonstration storefront. No payment is processed.</p>
+  </div>
+</aside>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
