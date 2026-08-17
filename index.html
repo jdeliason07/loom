@@ -21,32 +21,23 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<header class="site-header">
-  <div class="site-header__inner">
-    <a class="wordmark wordmark--flat" href="#top" aria-label="loom — home">loom</a>
+<!-- Top banner. The wordmark below travels into it on scroll. -->
+<header class="site-header"></header>
 
-    <nav class="site-nav" aria-label="Primary">
-      <a href="#ethos">Ethos</a>
-      <a href="#product">The bottle</a>
-    </nav>
-
-    <button type="button" class="cart-button" id="cart-button" aria-haspopup="dialog" aria-controls="order-drawer">
-      <span class="cart-button__label">Order</span>
-      <span class="cart-button__count" id="cart-count" data-empty="true">0</span>
-    </button>
-  </div>
-</header>
+<!-- The wordmark is fixed: it starts at hero scale over the reel and
+     shrinks into the centre of the banner as the page scrolls. -->
+<h1 class="wordmark wordmark--hero loom-gradient-text" id="wordmark">loom</h1>
 
 <main id="main">
 
-  <!-- ── 1. Hero ─────────────────────────────────────────────── -->
+  <!-- ── Hero ────────────────────────────────────────────────── -->
   <section class="hero" id="top">
     <div class="hero__media" aria-hidden="true">
       <!--
         Static backdrop. When footage exists, replace the <img> below with:
 
         <video class="hero__media-el" autoplay muted loop playsinline
-               poster="assets/img/hero-still.svg">
+               poster="assets/img/hero-poster.jpg">
           <source src="assets/video/hero.webm" type="video/webm">
           <source src="assets/video/hero.mp4"  type="video/mp4">
         </video>
@@ -58,51 +49,31 @@
     </div>
 
     <div class="hero__content">
-      <h1 class="wordmark wordmark--hero loom-gradient-text">loom</h1>
+      <!-- Reserves the wordmark's place in the layout; the visible
+           wordmark is the fixed element above. -->
+      <div class="hero__wordmark-slot" aria-hidden="true">loom</div>
       <p class="hero__tagline">For the creators of the world.</p>
     </div>
 
-    <a class="hero__cue" href="#ethos" aria-label="Scroll to Ethos">
+    <a class="hero__cue" href="#product" aria-label="Scroll to the bottle">
       <span class="hero__cue-line" aria-hidden="true"></span>
     </a>
   </section>
 
-  <!-- ── 2. Ethos ────────────────────────────────────────────── -->
-  <section class="section section--ethos" id="ethos">
-    <div class="container">
-      <p class="label">01 — Ethos</p>
-      <h2 class="section__headline">For the creators of the world</h2>
-
-      <div class="ethos__grid">
-        <article class="ethos__column">
-          <h3 class="label label--column">Vision</h3>
-          <p>A generation that builds on its own terms, unslowed by the objects it carries.</p>
-        </article>
-        <article class="ethos__column">
-          <h3 class="label label--column">Mission</h3>
-          <p>Make daily objects precise enough to disappear and honest enough to last — so the person carrying one spends their attention on the work, the road, and the risk.</p>
-        </article>
-      </div>
-
-      <p class="ethos__close">Not on the gear.</p>
-    </div>
-  </section>
-
-  <!-- ── 3. Product ──────────────────────────────────────────── -->
+  <!-- ── The bottle ──────────────────────────────────────────── -->
   <section class="section section--product" id="product">
     <div class="container">
-      <p class="label">02 — The bottle</p>
+      <p class="label">The bottle</p>
 
       <div class="product__grid">
         <div class="product__media">
-          <figure class="product__figure">
-            <div class="product__stage">
-              <img src="assets/img/no-01.svg" alt="No. 01 — a one-piece borosilicate glass bottle with a machined steel cap." width="480" height="1120">
-            </div>
-            <figcaption class="product__caption">
-              Shot: no. 01, studio. Light: 5600K, single hard key. Treatment: no color grade, no flare.
-            </figcaption>
-          </figure>
+          <div class="product__stage">
+            <picture>
+              <source srcset="assets/img/no-01.webp" type="image/webp">
+              <img src="assets/img/no-01.jpg" width="704" height="1524"
+                   alt="No. 01 — a one-piece glass bottle with a machined steel cap, reading “for the creators of the world” around its base.">
+            </picture>
+          </div>
         </div>
 
         <div class="product__detail">
@@ -119,28 +90,6 @@
             </div>
             <button type="submit" class="btn btn--primary">Purchase</button>
           </form>
-
-          <dl class="specs">
-            <div class="specs__row"><dt>Glass</dt><dd>Borosilicate, hand-formed</dd></div>
-            <div class="specs__row"><dt>Volume</dt><dd>1 L</dd></div>
-            <div class="specs__row"><dt>Weight</dt><dd>1.4 kg, filled</dd></div>
-            <div class="specs__row"><dt>Closure</dt><dd>Steel cap, machined, closes on the third turn</dd></div>
-            <div class="specs__row"><dt>Release</dt><dd>Open, numbered by hand</dd></div>
-          </dl>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── 4. In the box ───────────────────────────────────────── -->
-  <section class="section section--insert" id="in-the-box">
-    <div class="container">
-      <div class="insert">
-        <p class="label">03 — In the box</p>
-        <h2 class="insert__headline">This is the whole product</h2>
-        <div class="insert__copy">
-          <p>Borosilicate glass, formed in one piece. A steel cap machined to close on the third turn. No coating, no liner, no insert, no card after this one.</p>
-          <p>Wash it by hand. It will outlast the phone you're holding.</p>
         </div>
       </div>
     </div>
@@ -148,12 +97,11 @@
 
 </main>
 
-<!-- ── 5. Footer ─────────────────────────────────────────────── -->
+<!-- ── Footer ────────────────────────────────────────────────── -->
 <footer class="site-footer">
   <div class="container site-footer__inner">
     <p class="wordmark wordmark--flat wordmark--footer">loom</p>
     <p class="site-footer__tagline">For the creators of the world.</p>
-    <p class="site-footer__close">Wash it by hand. It will outlast the phone you're holding.</p>
     <p class="site-footer__meta">© <span id="year">2026</span> loom — No. 01, open release, numbered by hand.</p>
   </div>
 </footer>

@@ -10,7 +10,7 @@
     name: "No. 01",
     meta: "Borosilicate · 1 L",
     price: 99,
-    image: "assets/img/no-01.svg",
+    image: "assets/img/no-01.webp",
     max: 10
   };
 
@@ -21,11 +21,12 @@
 
   var el = {
     header: document.querySelector(".site-header"),
+    wordmark: document.getElementById("wordmark"),
+    slot: document.querySelector(".hero__wordmark-slot"),
+    tagline: document.querySelector(".hero__tagline"),
     year: document.getElementById("year"),
     form: document.getElementById("purchase-form"),
     qty: document.getElementById("qty"),
-    cartButton: document.getElementById("cart-button"),
-    cartCount: document.getElementById("cart-count"),
     drawer: document.getElementById("order-drawer"),
     backdrop: document.getElementById("drawer-backdrop"),
     close: document.getElementById("drawer-close"),
@@ -45,10 +46,6 @@
   function clamp(value, min, max) {
     if (isNaN(value)) return min;
     return Math.min(max, Math.max(min, value));
-  }
-
-  function totalUnits() {
-    return cart.reduce(function (sum, line) { return sum + line.qty; }, 0);
   }
 
   function totalPrice() {
@@ -139,11 +136,7 @@
   }
 
   function render() {
-    var units = totalUnits();
     var token = focusToken();
-
-    el.cartCount.textContent = String(units);
-    el.cartCount.dataset.empty = units === 0 ? "true" : "false";
 
     el.items.innerHTML = "";
     cart.forEach(function (line) { el.items.appendChild(lineItemNode(line)); });
@@ -190,7 +183,6 @@
     el.drawer.hidden = false;
     el.backdrop.hidden = false;
     document.body.classList.add("is-locked");
-    el.cartButton.setAttribute("aria-expanded", "true");
 
     // force a reflow so the transform transition actually runs
     void el.drawer.offsetWidth;
@@ -206,7 +198,6 @@
     el.drawer.classList.remove("is-open");
     el.backdrop.classList.remove("is-open");
     document.body.classList.remove("is-locked");
-    el.cartButton.setAttribute("aria-expanded", "false");
 
     closeTimer = window.setTimeout(function () {
       el.drawer.hidden = true;
@@ -234,7 +225,6 @@
 
   /* ── wiring ──────────────────────────────────────────────── */
 
-  el.cartButton.setAttribute("aria-expanded", "false");
   if (el.year) el.year.textContent = String(new Date().getFullYear());
 
   // product stepper
@@ -285,10 +275,6 @@
     showNotice("This is a demonstration only — no payment is taken and no order is placed.");
   });
 
-  el.cartButton.addEventListener("click", function () {
-    isOpen() ? closeDrawer() : openDrawer();
-  });
-
   el.close.addEventListener("click", closeDrawer);
   el.backdrop.addEventListener("click", closeDrawer);
 
@@ -302,11 +288,64 @@
     }
   });
 
+  /* ── wordmark: hero scale → centre of the top banner ─────────
+     The wordmark is fixed. .hero__wordmark-slot holds its place in the
+     hero layout and tells us where it rests at the top of the page; the
+     banner's mid-line tells us where it lands. Scroll interpolates
+     between the two. --------------------------------------------------- */
+
+  var BANNER_SIZE = 34; // px, the wordmark's font-size once docked
+
+  var wm = { start: 0, end: 0, scale: 1, travel: 1 };
+
+  function measureWordmark() {
+    var slot = el.slot.getBoundingClientRect();
+    var fontSize = parseFloat(window.getComputedStyle(el.wordmark).fontSize) || 1;
+
+    wm.start = slot.top + window.scrollY + slot.height / 2;
+    wm.end = el.header.getBoundingClientRect().height / 2;
+    wm.scale = Math.min(1, BANNER_SIZE / fontSize);
+    wm.travel = Math.max(1, window.innerHeight * 0.55);
+  }
+
+  function paintWordmark() {
+    var p = clamp(window.scrollY / wm.travel, 0, 1);
+
+    // reduced motion: dock it outright rather than animating on scroll
+    if (reduceMotion.matches) p = window.scrollY > 24 ? 1 : 0;
+    else p = p * p * (3 - 2 * p); // smoothstep
+
+    el.wordmark.style.setProperty("--wm-y", (wm.start + (wm.end - wm.start) * p).toFixed(2) + "px");
+    el.wordmark.style.setProperty("--wm-s", (1 + (wm.scale - 1) * p).toFixed(4));
+    el.tagline.style.opacity = String(clamp(1 - p * 1.8, 0, 1));
+  }
+
   // header treatment on scroll
+  var ticking = false;
+
   function onScroll() {
     el.header.classList.toggle("is-scrolled", window.scrollY > 24);
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      paintWordmark();
+      ticking = false;
+    });
   }
+
+  function onResize() {
+    measureWordmark();
+    paintWordmark();
+  }
+
   window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", onResize);
+
+  // the slot's height depends on Space Grotesk, so measure again once it lands
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
+
+  onResize();
   onScroll();
 
   render();
