@@ -284,6 +284,73 @@
     }
   });
 
+  /* ── The reel, from hero to page ground ──────────────────────
+     At rest the reel is the hero. Scrolling zooms it out to full
+     bleed, dims and blurs it back, and — once it has settled — pauses
+     it: one still frame behind the rest of the site. Scroll back to
+     the top and it picks up where it left off. ------------------- */
+
+  var backdrop = document.getElementById("backdrop");
+  var reel = document.getElementById("backdrop-video");
+
+  if (backdrop && reel) {
+    var root = document.documentElement;
+    var progress = -1;
+    var queued = false;
+
+    /* The reel is laid out contained (a panel on wide screens, the
+       viewport on narrow ones); this is the scale that takes it to full
+       bleed. The 6% of overscan keeps the blur from feathering the
+       edges of the viewport in. */
+    var coverScale = function () {
+      var width = reel.offsetWidth;
+      var height = reel.offsetHeight;
+      if (!width || !height) return 1;
+      return Math.max(window.innerWidth / width, window.innerHeight / height) * 1.06;
+    };
+
+    var measure = function () {
+      root.style.setProperty("--bg-cover", coverScale().toFixed(4));
+    };
+
+    var apply = function () {
+      queued = false;
+
+      var span = Math.max(window.innerHeight * 0.7, 1);
+      var next = Math.min(1, Math.max(0, window.scrollY / span));
+
+      // Reduced motion: no scroll-linked zoom, just the two states.
+      if (reduceMotion.matches) next = next > 0.35 ? 1 : 0;
+      if (next === progress) return;
+      progress = next;
+
+      root.style.setProperty("--bg-p", next.toFixed(4));
+      // soften early: the zoom reads as receding, not as an upscale
+      backdrop.classList.toggle("is-background", next > 0.28);
+
+      if (next === 1) {
+        reel.pause();
+      } else if (reel.paused) {
+        var playing = reel.play();
+        // autoplay can be refused; the poster frame stands in for it
+        if (playing && typeof playing.catch === "function") playing.catch(function () {});
+      }
+    };
+
+    var schedule = function () {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(apply);
+    };
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", function () { measure(); schedule(); });
+    reel.addEventListener("loadedmetadata", measure);
+
+    measure();   // intrinsic size may not be known yet — loadedmetadata re-measures
+    apply();     // a reload partway down the page starts as the background
+  }
+
   /* ── reveal ──────────────────────────────────────────────────
      The wordmark section sits below the reel, so it fades up as it
      comes into view rather than being there from the start. ---------- */

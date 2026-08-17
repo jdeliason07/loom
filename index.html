@@ -21,20 +21,23 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- ── The reel: hero first, then the ground the whole site sits on ──
+     app.js drives --bg-p from 0 (hero) to 1 (paused background). -->
+<div class="backdrop" id="backdrop" aria-hidden="true">
+  <video class="backdrop__video" id="backdrop-video" autoplay muted loop playsinline
+         preload="metadata" tabindex="-1"
+         poster="assets/img/hero-poster.jpg">
+    <source src="assets/video/hero.mp4"  type="video/mp4">
+    <source src="assets/video/hero.webm" type="video/webm">
+  </video>
+  <div class="backdrop__scrim"></div>
+  <div class="backdrop__wash"></div>
+</div>
+
 <main id="main">
 
-  <!-- ── Hero: the reel, and nothing over it ─────────────────── -->
+  <!-- ── Hero: the reel holds the screen, and nothing over it ──── -->
   <section class="hero" id="top">
-    <div class="hero__media" aria-hidden="true">
-      <video class="hero__media-el" autoplay muted loop playsinline
-             preload="metadata" tabindex="-1"
-             poster="assets/img/hero-poster.jpg">
-        <source src="assets/video/hero.mp4"  type="video/mp4">
-        <source src="assets/video/hero.webm" type="video/webm">
-      </video>
-      <div class="hero__scrim"></div>
-    </div>
-
     <a class="hero__cue" href="#loom" aria-label="Scroll on">
       <span class="hero__cue-line" aria-hidden="true"></span>
     </a>
