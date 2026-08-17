@@ -20,10 +20,6 @@
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   var el = {
-    header: document.querySelector(".site-header"),
-    wordmark: document.getElementById("wordmark"),
-    slot: document.querySelector(".hero__wordmark-slot"),
-    tagline: document.querySelector(".hero__tagline"),
     year: document.getElementById("year"),
     form: document.getElementById("purchase-form"),
     qty: document.getElementById("qty"),
@@ -288,65 +284,31 @@
     }
   });
 
-  /* ── wordmark: hero scale → centre of the top banner ─────────
-     The wordmark is fixed. .hero__wordmark-slot holds its place in the
-     hero layout and tells us where it rests at the top of the page; the
-     banner's mid-line tells us where it lands. Scroll interpolates
-     between the two. --------------------------------------------------- */
+  /* ── reveal ──────────────────────────────────────────────────
+     The wordmark section sits below the reel, so it fades up as it
+     comes into view rather than being there from the start. ---------- */
 
-  var BANNER_SIZE = 34; // px, the wordmark's font-size once docked
+  var revealables = document.querySelectorAll(".reveal");
 
-  var wm = { start: 0, end: 0, scale: 1, travel: 1 };
-
-  function measureWordmark() {
-    var slot = el.slot.getBoundingClientRect();
-    var fontSize = parseFloat(window.getComputedStyle(el.wordmark).fontSize) || 1;
-
-    wm.start = slot.top + window.scrollY + slot.height / 2;
-    wm.end = el.header.getBoundingClientRect().height / 2;
-    wm.scale = Math.min(1, BANNER_SIZE / fontSize);
-    wm.travel = Math.max(1, window.innerHeight * 0.55);
-  }
-
-  function paintWordmark() {
-    var p = clamp(window.scrollY / wm.travel, 0, 1);
-
-    // reduced motion: dock it outright rather than animating on scroll
-    if (reduceMotion.matches) p = window.scrollY > 24 ? 1 : 0;
-    else p = p * p * (3 - 2 * p); // smoothstep
-
-    el.wordmark.style.setProperty("--wm-y", (wm.start + (wm.end - wm.start) * p).toFixed(2) + "px");
-    el.wordmark.style.setProperty("--wm-s", (1 + (wm.scale - 1) * p).toFixed(4));
-    el.tagline.style.opacity = String(clamp(1 - p * 1.8, 0, 1));
-  }
-
-  // header treatment on scroll
-  var ticking = false;
-
-  function onScroll() {
-    el.header.classList.toggle("is-scrolled", window.scrollY > 24);
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(function () {
-      paintWordmark();
-      ticking = false;
+  function revealAll() {
+    Array.prototype.forEach.call(revealables, function (node) {
+      node.classList.add("is-visible");
     });
   }
 
-  function onResize() {
-    measureWordmark();
-    paintWordmark();
+  if (reduceMotion.matches || !("IntersectionObserver" in window)) {
+    revealAll();
+  } else {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.25 });
+
+    Array.prototype.forEach.call(revealables, function (node) { observer.observe(node); });
   }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onResize);
-  window.addEventListener("orientationchange", onResize);
-
-  // the slot's height depends on Space Grotesk, so measure again once it lands
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
-
-  onResize();
-  onScroll();
 
   render();
 })();

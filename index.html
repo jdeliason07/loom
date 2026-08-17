@@ -21,43 +21,29 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- Top banner. The wordmark below travels into it on scroll. -->
-<header class="site-header"></header>
-
-<!-- The wordmark is fixed: it starts at hero scale over the reel and
-     shrinks into the centre of the banner as the page scrolls. -->
-<h1 class="wordmark wordmark--hero loom-gradient-text" id="wordmark">loom</h1>
-
 <main id="main">
 
-  <!-- ── Hero ────────────────────────────────────────────────── -->
+  <!-- ── Hero: the reel, and nothing over it ─────────────────── -->
   <section class="hero" id="top">
     <div class="hero__media" aria-hidden="true">
-      <!--
-        Static backdrop. When footage exists, replace the <img> below with:
-
-        <video class="hero__media-el" autoplay muted loop playsinline
-               poster="assets/img/hero-poster.jpg">
-          <source src="assets/video/hero.webm" type="video/webm">
-          <source src="assets/video/hero.mp4"  type="video/mp4">
-        </video>
-
-        Nothing else needs to change — .hero__media-el covers the layer.
-      -->
-      <img class="hero__media-el" src="assets/img/hero-still.svg" alt="">
+      <video class="hero__media-el" autoplay muted loop playsinline
+             preload="metadata" tabindex="-1"
+             poster="assets/img/hero-poster.jpg">
+        <source src="assets/video/hero.mp4"  type="video/mp4">
+        <source src="assets/video/hero.webm" type="video/webm">
+      </video>
       <div class="hero__scrim"></div>
     </div>
 
-    <div class="hero__content">
-      <!-- Reserves the wordmark's place in the layout; the visible
-           wordmark is the fixed element above. -->
-      <div class="hero__wordmark-slot" aria-hidden="true">loom</div>
-      <p class="hero__tagline">For the creators of the world.</p>
-    </div>
-
-    <a class="hero__cue" href="#product" aria-label="Scroll to the bottle">
+    <a class="hero__cue" href="#loom" aria-label="Scroll on">
       <span class="hero__cue-line" aria-hidden="true"></span>
     </a>
+  </section>
+
+  <!-- ── The wordmark, at full scale ─────────────────────────── -->
+  <section class="statement" id="loom">
+    <h1 class="wordmark wordmark--hero loom-gradient-text reveal">loom</h1>
+    <p class="statement__tagline reveal">For the creators of the world.</p>
   </section>
 
   <!-- ── The bottle ──────────────────────────────────────────── -->

@@ -18,8 +18,9 @@ python3 -m http.server 8000   # → http://localhost:8000
 index.html                     the whole page
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
-assets/js/app.js               quantity stepper, order drawer, cart state
-assets/img/hero-still.svg      hero backdrop (placeholder)
+assets/js/app.js               quantity stepper, order drawer, cart state, reveal
+assets/video/hero.mp4/.webm    the hero reel
+assets/img/hero-poster.jpg     first frame, shown until the reel starts
 assets/img/no-01.webp/.jpg     the No. 01 studio photograph
 assets/img/favicon.svg         the wordmark's "lo", cropped square
 ```
@@ -33,40 +34,47 @@ is nothing to build and no output directory to point at. If Vercel's project
 settings ask for a framework preset, it's "Other"; leave the build command
 empty and the output directory as the root.
 
-## The wordmark
+## Page order
 
-The wordmark is a single fixed element. At the top of the page it sits at hero
-scale over the reel; as you scroll it shrinks and travels to the centre of the
-top banner, docking there. `.hero__wordmark-slot` is an invisible copy that
-holds its place in the hero layout and tells `app.js` where it rests; the
-banner's mid-line tells it where to land. Under `prefers-reduced-motion` it
-docks outright instead of tracking the scroll.
+1. **Hero** — the reel, full viewport, with nothing over it.
+2. **The wordmark** — its own near-full-height section (`.statement`), so the
+   gradient arrives after you scroll down from the video. It fades up as it
+   enters view; under `prefers-reduced-motion` it is simply there.
+3. **The bottle** — photograph, price, quantity, Purchase.
+4. **Footer.**
 
-The banner size is `BANNER_SIZE` in `app.js` (34px). Note this is the one place
-the site bends a brand rule: the gradient treatment is specified as hero-only
-because it loses contrast at small sizes. 34px is the floor at which it still
-reads — going smaller will start to muddy it.
+There is no fixed header: nothing needed to live in it, so the page has no top
+chrome at all. The order drawer opens from the Purchase button and closes with
+its own control, Escape, or the backdrop.
 
-The banner holds nothing else, so the order drawer opens from the Purchase
-button and closes with its own control, Escape, or the backdrop.
+## The reel
 
-## Placeholder assets
+`hero.mp4` (H.264) is listed first for Safari and iOS; `hero.webm` (VP9) is
+there for browsers without H.264. Both are silent — the audio track is stripped,
+which is also what lets the video autoplay. `hero-poster.jpg` holds the frame
+until playback starts, and stands in entirely if autoplay is refused.
 
-The product photograph is real. The hero backdrop is still a generated SVG
-standing in for footage:
+The source was 1180×1684 HEVC, 60fps, 5.4s, 6.9 MB. Encoded to 30fps at CRF 24
+(x264) and CRF 36 (VP9), it is 727 KB and 340 KB. To re-encode a new cut:
 
-**Hero reel** — replace the `<img class="hero__media-el">` inside `.hero__media`
-with the video markup already written out as a comment beside it:
-
-```html
-<video class="hero__media-el" autoplay muted loop playsinline
-       poster="assets/img/hero-poster.jpg">
-  <source src="assets/video/hero.webm" type="video/webm">
-  <source src="assets/video/hero.mp4"  type="video/mp4">
-</video>
+```sh
+ffmpeg -i source.mov -an -r 30 -c:v libx264 -pix_fmt yuv420p -crf 24 \
+  -preset slow -movflags +faststart assets/video/hero.mp4
+ffmpeg -i source.mov -an -r 30 -c:v libvpx-vp9 -crf 36 -b:v 0 -row-mt 1 \
+  assets/video/hero.webm
+ffmpeg -ss 0.1 -i source.mov -frames:v 1 assets/img/hero-poster.jpg
 ```
 
-`.hero__media-el` covers the layer either way, so no CSS changes are needed.
+The footage is portrait. On phones it fills the viewport; from 900px up,
+filling the screen would mean upscaling a single face past 1440px, so the reel
+is shown at its own proportions as a centred, rounded panel on the Void
+(`.hero__media-el`, in the `min-width: 900px` block). Swap in landscape footage
+and you can delete that block to go full-bleed everywhere.
+
+## Replacing the imagery
+
+**Reel** — drop new files at `assets/video/hero.mp4` / `.webm` and a new
+`assets/img/hero-poster.jpg` (see the ffmpeg lines above). No markup changes.
 
 **Product photo** — `no-01.webp` with a `no-01.jpg` fallback, served full-bleed
 from `.product__stage`; its own light studio ground becomes a plate against the
@@ -82,16 +90,16 @@ dark page. To replace it, swap both files (and `PRODUCT.image` in
   wordmark (`.loom-gradient-text`). The primary CTA uses `--color-accent`.
   Accents appear nowhere else — no body text, no routine chrome.
 - The wordmark is always lowercase, never tracked, stretched or italicized.
-  The gradient runs from hero scale down to the banner (see above); the footer
-  uses the flat `--color-text-primary` ink.
+  The gradient treatment appears once, at hero scale on the Void, in its own
+  section; the footer uses the flat `--color-text-primary` ink.
 - Space Grotesk 500 for display (sentence case, default letter-spacing), Inter
   for body and UI, JetBrains Mono for tracked-uppercase labels and metadata.
 - Corner radii come from `--radius-sm/md/lg` in `styles.css`; nothing is
   square.
 
 Dark is the shipped theme. `loom-colors.css` carries a `[data-theme="light"]`
-block, but no toggle is wired up: the hero wordmark's gradient is tuned for the
-Void background and loses contrast on light. If a toggle is added later, the
+block, but no toggle is wired up: the wordmark's gradient is tuned for the Void
+background and loses contrast on light. If a toggle is added later, the
 primary button's ink (`color: var(--color-bg)`) needs an explicit dark override,
 since the accent stays blue in both themes.
 
