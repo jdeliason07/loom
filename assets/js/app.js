@@ -1,6 +1,8 @@
 /* ============================================================
    vates — storefront behaviour
    Client-side state only. Nothing is persisted, nothing is sent.
+   Three parts: the store (cart, drawer, checkout), the iris (the
+   opening's canvas), and the film-to-reel handover in Who we are.
    ============================================================ */
 (function () {
   "use strict";
@@ -9,8 +11,8 @@
     id: "no-01",
     name: "No. 01",
     price: 49,
-    /* The drawer shows the bottle on its own, not the desk scene the
-       product section uses — at 4.5rem a whole room is a smudge. */
+    /* The drawer shows the bottle on its own — at 4.5rem a whole
+       room is a smudge. */
     image: "assets/img/no-01-thumb.webp",
     max: 10
   };
@@ -89,7 +91,7 @@
       "<div>" +
         '<div class="line-item__head">' +
           '<span class="line-item__name">' + PRODUCT.name +
-            '<span class="line-item__aka">\u2009\u2014\u2009\u201cThe Bottle\u201d</span>' +
+            '<span class="line-item__aka"> — smoke</span>' +
           "</span>" +
         "</div>" +
         '<div class="line-item__controls">' +
@@ -234,11 +236,9 @@
   if (window.VATES_TRACK) window.VATES_TRACK.track("view");
 
   /* The shortest path there is from the advert to the receipt. With a
-     Payment Link configured, Purchase leaves for Stripe on the click —
-     no cart, no account, no page of ours in between — and Stripe's own
-     receipt email is the confirmation. The attribution token rides
-     along as client_reference_id, so the sale lands in the dashboard
-     already credited to whoever sent them.
+     Payment Link configured, Checkout leaves for Stripe on the click —
+     the attribution token rides along as client_reference_id, so the
+     sale lands in the dashboard already credited to whoever sent them.
 
      With no link configured it falls back to the demonstration drawer,
      so the button is never dead while the storefront is being set up. */
@@ -280,9 +280,8 @@
   }
 
   /* Purchase opens the drawer; the drawer's Checkout is what leaves for
-     Stripe. The step in between is not friction for its own sake — it is
-     where "What's in the box" gets read, which is the last thing anyone
-     wants to know before paying. */
+     Stripe. The step in between is where "What's in the box" gets read,
+     which is the last thing anyone wants to know before paying. */
   el.form.addEventListener("submit", function (event) {
     event.preventDefault();
     hideNotice();
@@ -316,7 +315,7 @@
     setLineQty(item.dataset.id, parseInt(input.value, 10));
   });
 
-  // checkout is inert by design
+  // falls back to the demonstration notice when no Payment Link is set
   el.checkout.addEventListener("click", function () {
     if (goToCheckout()) return;
     showNotice("This is a demonstration only — no payment is taken and no order is placed.");
@@ -335,163 +334,150 @@
     }
   });
 
-  /* ── Paging with a mouse ─────────────────────────────────────
-     CSS scroll snapping gives a touchscreen exactly what was asked
-     for, because a swipe is one continuous gesture the browser can
-     measure against the half-way mark before it settles.
+  render();
 
-     A mouse wheel is not one gesture. Each notch is its own scroll of
-     roughly a hundred pixels, which never reaches half a screen, so
-     mandatory snapping pulls every one of them straight back. Measured
-     at a 900px viewport: notches of 100, 120 and 240px all landed back
-     at 0, and three at a human pace did too — the page could not be
-     scrolled at all with a wheel.
+  /* ── The iris ────────────────────────────────────────────────
+     The seer's eye behind the opening: band-coloured rings breathing
+     out of step around a dark pupil, fine spokes slowly wheeling.
+     Runs only while the hero is on screen and the tab is visible;
+     reduced motion gets one still frame. --------------------------- */
 
-     So where the pointer is fine, the wheel is taken over and moves one
-     section per turn. A section taller than the screen is left alone
-     until its far edge is on screen, which is what keeps the product
-     section reading normally rather than paging under the cursor. */
+  var canvas = document.getElementById("iris");
 
-  var PAGES = ".hero, .statement, .section--product";
-  var finePointer = window.matchMedia("(pointer: fine)");
-  var paging = false;
+  if (canvas && canvas.getContext) {
+    var ctx = canvas.getContext("2d");
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var BANDS = ["#76b856", "#f2ba4b", "#e3873d", "#cf4743", "#8b4192", "#4698d3"];
+    var PAPER = "244, 238, 227";
+    var GROUND = "30, 24, 15";
+    var SPOKES = 96;
 
-  function onWheel(event) {
-    if (reduceMotion.matches) return;
-    if (event.ctrlKey) return;              // pinch to zoom, not a scroll
-    if (isOpen()) return;                   // the drawer scrolls itself
-    if (Math.abs(event.deltaY) < 4) return; // horizontal or a stray nudge
+    var W = 0, H = 0;
+    var t = 0, raf = 0, lastFrame = 0, running = false, heroVisible = true;
+    var rings = [];
 
-    var pages = [].slice.call(document.querySelectorAll(PAGES));
-    if (!pages.length) return;
-
-    var y = window.scrollY;
-    var viewport = window.innerHeight;
-    var tops = pages.map(function (el) {
-      return Math.round(el.getBoundingClientRect().top + y);
-    });
-
-    var here = 0;
-    for (var i = 0; i < tops.length; i++) if (y >= tops[i] - 2) here = i;
-
-    var height = pages[here].getBoundingClientRect().height;
-    var bottom = tops[here] + height;
-    var down = event.deltaY > 0;
-
-    /* Still something of this section left to read in the direction of
-       travel: let the browser scroll it the ordinary way. */
-    if (down && y + viewport < bottom - 2) return;
-    if (!down && y > tops[here] + 2) return;
-
-    var next = here + (down ? 1 : -1);
-    /* Past the last section is the footer, which is not a page — let
-       normal scrolling carry on into it. */
-    if (next < 0 || next >= tops.length) return;
-
-    event.preventDefault();
-    if (paging) return;
-    paging = true;
-    window.scrollTo({ top: tops[next], behavior: "smooth" });
-    window.setTimeout(function () { paging = false; }, 520);
-  }
-
-  /* Bound only where it is used, never merely guarded from inside. A
-     non-passive wheel listener takes scrolling off the compositor for
-     the whole document, and on a touch device that was enough on its
-     own to break the CSS snapping this is meant to complement — swipes
-     stopped advancing at all. Nothing is bound unless there is a mouse. */
-  function bindWheel(on) {
-    if (on) document.addEventListener("wheel", onWheel, { passive: false });
-    else document.removeEventListener("wheel", onWheel, { passive: false });
-  }
-
-  bindWheel(finePointer.matches);
-  /* A tablet with a trackpad attached mid-visit, and the reverse. */
-  if (finePointer.addEventListener) {
-    finePointer.addEventListener("change", function (e) { bindWheel(e.matches); });
-  }
-
-  /* ── The reel, from hero to page ground ──────────────────────
-     At rest the reel is the hero. Scrolling zooms it out to full
-     bleed, dims and blurs it back, and — once it has settled —
-     stops it: one still picture behind the rest of the site.
-     Scroll back to the top and it picks up where it left off. --- */
-
-  var backdrop = document.getElementById("backdrop");
-  var film = document.getElementById("backdrop-video");
-  var reelEl = document.getElementById("reel");
-
-  if (backdrop && film && reelEl) {
-    var root = document.documentElement;
-    var progress = -1;
-    var queued = false;
-    var handedOver = false;
-    var settled = false;
-    var timer = null;
-
-    /* Half a second a picture: fast cutting, not a slideshow. The
-       dissolve between them is --reel-fade in the stylesheet and has to
-       stay well inside this. Reduced motion gets a slow reel instead —
-       at this cadence the cuts are the motion. */
-    var FRAME_MS = reduceMotion.matches ? 4000 : 500;
-    var OVERSCAN = 1.06;   // keeps the background blur off the viewport edge
-
-    /* The film is laid out contained — a panel on wide screens, the
-       viewport on narrow ones — so the scale that takes it to full bleed
-       has to be measured. The reel is full bleed already: the overscan
-       is the whole of its cover. */
-    var coverScale = function () {
-      if (handedOver) return OVERSCAN;
-      var width = film.offsetWidth;
-      var height = film.offsetHeight;
-      if (!width || !height) return 1;
-      return Math.max(window.innerWidth / width, window.innerHeight / height) * OVERSCAN;
-    };
-
-    var measure = function () {
-      root.style.setProperty("--bg-cover", coverScale().toFixed(4));
-    };
-
-    /* Autoplay is a request, not a guarantee: iOS refuses it outright in
-       Low Power Mode, Low Data Mode does the same, and a per-site setting
-       can too. The film is pointer-events: none, so the play button iOS
-       paints over the poster is not tappable either — left alone, a
-       refused hero stays one still frame for the whole visit. Ask again
-       on the first gesture anywhere on the page, and whenever the tab
-       comes back to the foreground. */
-    var start = function () {
-      if (handedOver || progress >= 1 || !film.paused) return;
-      film.muted = true;   // unattended playback is only ever allowed muted
-      var playing = film.play();
-      if (playing && typeof playing.catch === "function") playing.catch(function () {});
-    };
-
-    /* These stay bound for the life of the page rather than being torn
-       down on first play: start() is a no-op once the film is running,
-       and leaving them means a film stalled or paused later — coming
-       back from the background, a mid-visit refusal — heals on the next
-       touch instead of staying stuck. */
-    ["touchstart", "pointerdown", "click", "keydown"].forEach(function (type) {
-      document.addEventListener(type, start, { passive: true });
-    });
-
-    document.addEventListener("visibilitychange", function () {
-      if (document.hidden) {
-        window.clearTimeout(timer);   // a backgrounded tab holds its picture
-      } else {
-        start();
-        hold();
+    var seed = function () {
+      rings = [];
+      for (var i = 0; i < 16; i++) {
+        rings.push({
+          f: 0.36 + 0.64 * (i / 15),
+          color: BANDS[i % 6],
+          a: 0.10 + Math.random() * 0.16,
+          wob: 1.5 + Math.random() * 3,
+          sp: 0.2 + Math.random() * 0.4,
+          ph: Math.random() * Math.PI * 2
+        });
       }
-    });
+    };
 
-    /* ── The reel of stills ──────────────────────────────────────
-       The pictures are named in the markup, not here: data-frame-src
-       is the path with {n} standing in for a two-digit number,
-       counted from 01 up to data-frame-count. ------------------- */
+    var draw = function () {
+      ctx.clearRect(0, 0, W, H);
+      var cx = W / 2, cy = H * 0.52;
+      var R = Math.min(W * 0.46, H * 0.44) * (1 + 0.02 * Math.sin(t * 0.5));
+      var i;
+
+      /* the glow behind everything */
+      var glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
+      glow.addColorStop(0, "rgba(227, 135, 61, 0.16)");
+      glow.addColorStop(1, "rgba(227, 135, 61, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(cx - R * 1.7, cy - R * 1.7, R * 3.4, R * 3.4);
+
+      /* fine spokes, slowly wheeling */
+      ctx.strokeStyle = "rgba(" + PAPER + ", 0.07)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (i = 0; i < SPOKES; i++) {
+        var an = (i / SPOKES) * Math.PI * 2 + t * 0.05;
+        var r0 = R * 0.4, r1 = R * (0.96 + 0.03 * Math.sin(t * 0.7 + i));
+        ctx.moveTo(cx + Math.cos(an) * r0, cy + Math.sin(an) * r0);
+        ctx.lineTo(cx + Math.cos(an) * r1, cy + Math.sin(an) * r1);
+      }
+      ctx.stroke();
+
+      /* the rings, band-coloured, breathing out of step */
+      for (i = 0; i < rings.length; i++) {
+        var g = rings[i];
+        var rr = R * g.f + Math.sin(t * g.sp + g.ph) * g.wob;
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.max(1, rr), 0, Math.PI * 2);
+        ctx.strokeStyle = g.color;
+        ctx.globalAlpha = g.a * (0.8 + 0.2 * Math.sin(t * g.sp * 1.3 + g.ph));
+        ctx.lineWidth = 1 + (i % 3) * 0.7;
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      /* the pupil, and one still point of light */
+      var pu = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.36);
+      pu.addColorStop(0, "rgba(" + GROUND + ", 1)");
+      pu.addColorStop(0.85, "rgba(" + GROUND + ", 1)");
+      pu.addColorStop(1, "rgba(" + GROUND + ", 0)");
+      ctx.fillStyle = pu;
+      ctx.beginPath(); ctx.arc(cx, cy, R * 0.36, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(" + PAPER + ", 0.9)";
+      ctx.beginPath(); ctx.arc(cx - R * 0.09, cy - R * 0.11, 2.4, 0, Math.PI * 2); ctx.fill();
+    };
+
+    var resize = function () {
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      if (!W || !H) return;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      seed();
+      if (reduceMotion.matches) { t = 1; draw(); }
+    };
+
+    var loop = function (now) {
+      if (!running) return;
+      var dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
+      lastFrame = now;
+      t += dt;
+      draw();
+      raf = window.requestAnimationFrame(loop);
+    };
+
+    var setRunning = function (on) {
+      on = on && !reduceMotion.matches && heroVisible && !document.hidden;
+      if (on === running) return;
+      running = on;
+      if (running) { lastFrame = 0; raf = window.requestAnimationFrame(loop); }
+      else window.cancelAnimationFrame(raf);
+    };
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        heroVisible = entries[0].isIntersecting;
+        setRunning(true);
+      }, { threshold: 0.05 }).observe(canvas);
+    }
+    document.addEventListener("visibilitychange", function () { setRunning(true); });
+    window.addEventListener("resize", resize);
+    if (reduceMotion.addEventListener) {
+      reduceMotion.addEventListener("change", function () { resize(); setRunning(true); });
+    }
+
+    resize();
+    setRunning(true);
+  }
+
+  /* ── The film, then the creators ─────────────────────────────
+     The archive reel lives inside the film's own frame and takes
+     over the moment the film ends. The pictures are named in the
+     markup: data-frame-src is the path with {n} standing in for a
+     two-digit number, counted from 01 up to data-frame-count.
+     Replaying the film puts it back on top; the reel returns at the
+     next "ended". Holds its picture when the tab is hidden or the
+     section is off screen. ---------------------------------------- */
+
+  var film = document.getElementById("about-film");
+  var reel = document.getElementById("about-reel");
+
+  if (film && reel) {
     var frames = (function () {
       var list = [];
-      var template = reelEl.getAttribute("data-frame-src");
-      var count = parseInt(reelEl.getAttribute("data-frame-count"), 10);
+      var template = reel.getAttribute("data-frame-src");
+      var count = parseInt(reel.getAttribute("data-frame-count"), 10);
       if (!template || !(count > 0)) return list;
       for (var i = 1; i <= count; i++) {
         list.push(template.replace("{n}", (i < 10 ? "0" : "") + i));
@@ -499,56 +485,13 @@
       return list;
     })();
 
-    var slots = reelEl.querySelectorAll(".reel__frame");
-    var idle = 1;      // the slot the next picture is decoded into
-    var cursor = -1;   // how far through `frames` the reel has got
-    var warmed = 0;    // how many have been pulled into cache so far
+    var slots = reel.querySelectorAll("img");
+    var idle = 1, cursor = -1, timer = null, visible = true, active = false;
+    var warmed = 0;
+    var HOLD = 2600;
 
-    /* Settled once the picture is loaded and decoded, so it is never
-       faded up half-drawn. decode() only smooths the paint; load and
-       error are what decide whether the picture is there at all. An
-       image already in cache is complete before either can fire. */
-    var ready = function (img) {
-      return new Promise(function (resolve, reject) {
-        if (img.complete) {
-          if (img.naturalWidth) resolve(); else reject();
-          return;
-        }
-        img.onload = resolve;
-        img.onerror = reject;
-      }).then(function () {
-        return img.decode ? img.decode().catch(function () {}) : null;
-      });
-    };
-
-    /* At two pictures a second there is no room to fetch one between
-       cuts, so the whole reel is pulled into cache up front and the film
-       plays over the top of it, buying the time. Detached Images are
-       enough — the cache is what the slots actually read from, and a
-       picture that fails here fails again in turn(), where it is
-       dropped from the reel. */
-    var warm = function () {
-      /* Warming all 32 is right on a desk and wrong on a phone on
-         cellular: it is roughly 2.5 MB before anyone has decided to buy
-         anything. Where the browser will say — Data Saver on, or a
-         connection it reports as 2g/3g — only the opening handful are
-         fetched, and the rest arrive as the reel reaches them. The reel
-         degrades to a slower first pass rather than to nothing. */
-      var link = navigator.connection || {};
-      var thrifty = link.saveData === true ||
-        /^(slow-)?2g$/.test(link.effectiveType || "") ||
-        link.effectiveType === "3g";
-      var take = thrifty ? Math.min(6, frames.length) : frames.length;
-      frames.slice(0, take).forEach(function (src) {
-        var img = new Image();
-        img.src = src;
-      });
-      warmed = take;
-    };
-
-    /* Whatever warm() left behind is picked up as the reel advances, so
-       a thrifty connection still ends up with the whole reel — just
-       paid for a frame at a time instead of all at once. */
+    /* Pull the first pictures into cache while the film plays, so the
+       handover lands on a decoded frame rather than a fetch. */
     var warmNext = function () {
       if (warmed >= frames.length) return;
       var img = new Image();
@@ -556,154 +499,50 @@
       warmed += 1;
     };
 
-    var hold = function () {
-      window.clearTimeout(timer);
-      if (!handedOver || settled || document.hidden || frames.length < 2) return;
-      timer = window.setTimeout(function () { turn(0); }, FRAME_MS);
-    };
-
-    /* Bring the next picture up in the idle slot, then swap which slot is
-       showing. A picture that will not load is dropped from the reel
-       rather than left as a gap in it; `tried` stops the search when none
-       of them will load. */
-    var turn = function (tried) {
-      if (!frames.length || tried > frames.length) return;
-
+    var turn = function () {
+      if (!frames.length) return;
       cursor = (cursor + 1) % frames.length;
-      var index = cursor;
       var slot = slots[idle];
-      var pic = slot.querySelector(".reel__pic");
-      var blur = slot.querySelector(".reel__blur");
-
-      pic.src = frames[index];
-      blur.src = frames[index];   // the same file, so it costs one request
-
-      ready(pic).then(function () {
-        slots[idle].classList.add("is-current");
+      slot.src = frames[cursor];
+      var done = function () {
+        if (!active) return;
+        slot.classList.add("is-current");
         slots[1 - idle].classList.remove("is-current");
         idle = 1 - idle;
-        /* The film only steps aside once a picture has actually landed:
-           if none of them load, the hero holds the last frame of the film
-           rather than cutting to black. */
-        backdrop.classList.add("is-reel");
         warmNext();
         hold();
-      })["catch"](function () {
-        frames.splice(index, 1);
-        cursor = index - 1;
-        turn(tried + 1);
-      });
+      };
+      if (slot.decode) slot.decode().then(done)["catch"](done);
+      else done();
     };
 
-    /* The film plays once, then the reel takes over and loops for the
-       rest of the visit. It runs once, and a film that fails to load
-       hands over rather than leaving the hero on a dead poster. */
-    /* Leaving for Stripe and coming back is a full page load, and the
-       film played again every time — a brand moment on the way in, an
-       obstacle on the way back to something you were part-way through
-       buying. It is remembered for the tab's lifetime instead: seen
-       once, and every load after that opens on the reel. sessionStorage
-       rather than local, so a genuinely new visit still gets it. */
-    var SEEN_KEY = "vates.film.seen";
-
-    var filmSeen = function () {
-      try { return window.sessionStorage.getItem(SEEN_KEY) === "1"; } catch (e) { return false; }
+    var hold = function () {
+      window.clearTimeout(timer);
+      if (!active || document.hidden || !visible || reduceMotion.matches) return;
+      timer = window.setTimeout(turn, HOLD);
     };
 
-    var markSeen = function () {
-      try { window.sessionStorage.setItem(SEEN_KEY, "1"); } catch (e) {}
-    };
-
-    var handOver = function () {
-      if (handedOver) return;
-      handedOver = true;
-      markSeen();
-      measure();   // the reel is full bleed where the film was contained
-      turn(0);
-    };
-
-    film.addEventListener("ended", handOver);
-    film.addEventListener("error", handOver);
-
-    /* Marked on the first frame played, not on the last. Someone who
-       presses Purchase part-way through the film and comes back from
-       Stripe never reaches "ended" — and they are precisely the person
-       who should not be made to sit through it a second time. */
-    film.addEventListener("playing", markSeen);
-
-    var apply = function () {
-      queued = false;
-
-      var span = Math.max(window.innerHeight * 0.7, 1);
-      var next = Math.min(1, Math.max(0, window.scrollY / span));
-
-      // Reduced motion: no scroll-linked zoom, just the two states.
-      if (reduceMotion.matches) next = next > 0.35 ? 1 : 0;
-      if (next === progress) return;
-      progress = next;
-
-      root.style.setProperty("--bg-p", next.toFixed(4));
-      // soften early: the zoom reads as receding, not as an upscale
-      backdrop.classList.toggle("is-background", next > 0.28);
-
-      if (next === 1) {
-        settled = true;
-        window.clearTimeout(timer);
-        film.pause();
-      } else {
-        settled = false;
-        start();
-        hold();
-      }
-    };
-
-    var schedule = function () {
-      if (queued) return;
-      queued = true;
-      window.requestAnimationFrame(apply);
-    };
-
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", function () { measure(); schedule(); });
-    film.addEventListener("loadedmetadata", measure);
-
-    warm();      // the reel is in cache long before the film hands over to it
-    measure();   // intrinsic size may not be known yet — loadedmetadata re-measures
-    apply();     // a reload partway down the page starts as the background
-
-    /* Already seen it this visit: stop the film before it starts and go
-       straight to the reel. */
-    if (filmSeen()) {
-      film.pause();
-      handOver();
-    }
-  }
-
-  /* ── reveal ──────────────────────────────────────────────────
-     The wordmark section sits below the reel, so it fades up as it
-     comes into view rather than being there from the start. ---------- */
-
-  var revealables = document.querySelectorAll(".reveal");
-
-  function revealAll() {
-    Array.prototype.forEach.call(revealables, function (node) {
-      node.classList.add("is-visible");
+    film.addEventListener("play", function () {
+      /* Replay: the film comes back on top, the reel stands down. */
+      active = false;
+      window.clearTimeout(timer);
+      slots[0].classList.remove("is-current");
+      slots[1].classList.remove("is-current");
+      /* a head start for the handover */
+      warmNext(); warmNext(); warmNext();
     });
+
+    film.addEventListener("ended", function () {
+      active = true;
+      turn();   // under reduced motion this lands one still and stays
+    });
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        hold();
+      }, { threshold: 0.1 }).observe(reel);
+    }
+    document.addEventListener("visibilitychange", hold);
   }
-
-  if (reduceMotion.matches || !("IntersectionObserver" in window)) {
-    revealAll();
-  } else {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
-      });
-    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.25 });
-
-    Array.prototype.forEach.call(revealables, function (node) { observer.observe(node); });
-  }
-
-  render();
 })();

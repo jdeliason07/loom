@@ -38,11 +38,11 @@
 <link rel="stylesheet" href="assets/brand/loom-colors.css">
 <link rel="stylesheet" href="assets/css/styles.css">
 
-<!-- The reel is what the visit is spent looking at, and the first frame
-     is what the film hands over to. Everything else the page needs is
-     already inlined or local. -->
+<!-- The opening is drawn on a canvas, so the first paint is type: the
+     two faces and the wordmark. The bottle arrives below the fold. -->
 <link rel="preload" href="assets/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/img/no-01.webp" as="image" type="image/webp" fetchpriority="high">
+<link rel="preload" href="assets/fonts/fraunces-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/brand/vates-wordmark.svg" as="image" type="image/svg+xml">
 
 <!-- Configuration first, then tracking: track.js reads VATES on load.
      Both are deferred, so neither delays the first paint, and both run
@@ -88,91 +88,171 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- ── The reel: hero first, then the ground the whole site sits on ──
-     The intro film plays once on load; when it ends app.js hands over to
-     the reel of stills, which crossfades from one picture to the next and
-     loops for the rest of the visit. No loop attribute on the video on
-     purpose — without "ended" there is no handover. app.js drives --bg-p
-     from 0 (hero) to 1 (paused background).
-
-     The reel names its pictures here rather than in app.js: data-frame-src
-     is the path with {n} standing in for a two-digit number, counted from
-     01 up to data-frame-count. The two slots take turns, so the next picture
-     is decoded into the idle one before it is faded up; each holds the
-     picture whole over a blurred copy of itself. -->
-<div class="backdrop" id="backdrop" aria-hidden="true">
-  <video class="backdrop__video" id="backdrop-video" autoplay muted playsinline
-         preload="metadata" tabindex="-1"
-         poster="assets/img/hero-poster.jpg">
-    <source src="assets/video/intro.mp4"  type="video/mp4">
-    <source src="assets/video/intro.webm" type="video/webm">
-  </video>
-  <div class="reel" id="reel"
-       data-frame-src="assets/img/reel/{n}.webp"
-       data-frame-count="32">
-    <div class="reel__frame">
-      <img class="reel__blur" alt="" decoding="async">
-      <img class="reel__pic" alt="" decoding="async">
-    </div>
-    <div class="reel__frame">
-      <img class="reel__blur" alt="" decoding="async">
-      <img class="reel__pic" alt="" decoding="async">
-    </div>
-  </div>
-  <div class="backdrop__scrim"></div>
-  <div class="backdrop__wash"></div>
-</div>
+<!-- Placeholder portrait for the Trusted-by grid: a silhouette that
+     holds each creator's square until a real, permission-granted
+     headshot replaces it. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="avatar-sil" fill="currentColor">
+      <circle cx="32" cy="25" r="10.5"/>
+      <path d="M11.5 58 c2.5 -14.5 10.5 -20.5 20.5 -20.5 s18 6 20.5 20.5 z"/>
+    </g>
+  </defs>
+</svg>
 
 <main id="main">
 
-  <!-- ── Hero: the reel holds the screen, and nothing over it ──── -->
+  <!-- ── The opening: the mark and the words, over the seer's eye ──
+       The iris is drawn on the canvas by app.js: band-coloured rings
+       breathing around a dark pupil. It pauses off screen, in hidden
+       tabs, and under reduced motion. -->
   <section class="hero" id="top">
-    <a class="hero__cue" href="#vates" aria-label="Scroll on">
+    <canvas class="hero__canvas" id="iris" aria-hidden="true"></canvas>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>Visionaries</span><i class="sq sq-1"></i><span>Seers</span><i class="sq sq-3"></i><span>Revelators</span><i class="sq sq-5"></i><span>Visionaries</span><i class="sq sq-2"></i><span>Seers</span><i class="sq sq-4"></i><span>Revelators</span><i class="sq sq-6"></i>
+        <span>Visionaries</span><i class="sq sq-1"></i><span>Seers</span><i class="sq sq-3"></i><span>Revelators</span><i class="sq sq-5"></i><span>Visionaries</span><i class="sq sq-2"></i><span>Seers</span><i class="sq sq-4"></i><span>Revelators</span><i class="sq sq-6"></i>
+      </div>
+    </div>
+
+    <div class="hero__scrim" aria-hidden="true"></div>
+
+    <header class="top">
+      <h1 class="top__mark rise">
+        <img src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184">
+      </h1>
+    </header>
+
+    <div class="hero__copy">
+      <h2 class="hero__tag rise rise-2">for the creators of&nbsp;the&nbsp;world.</h2>
+      <p class="hero__intro rise rise-3">Essentials for the work, so your mind
+        stays on the vision.</p>
+    </div>
+
+    <a class="hero__cue" href="#about" aria-label="Scroll on">
       <span class="hero__cue-line" aria-hidden="true"></span>
     </a>
   </section>
 
-  <!-- ── The wordmark, at full scale ─────────────────────────── -->
-  <section class="statement" id="vates">
-    <p class="wordmark wordmark--hero reveal">
-      <img src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184">
-    </p>
-    <p class="statement__tagline reveal">For the creators of the world.</p>
+  <hr class="filament" aria-hidden="true">
+
+  <!-- ── Who we are: the film, then the creators ──────────────
+       The film plays on a tap. When it ends, app.js hands the same
+       frame to the archive reel — data-frame-src is the path with
+       {n} standing in for a two-digit number, counted from 01 up
+       to data-frame-count. Replaying the film puts it back on top. -->
+  <section class="about" id="about">
+    <div class="container about__inner">
+      <p class="label">Who we are</p>
+      <h2 class="about__title">We make essentials for people who make things.</h2>
+      <p class="about__body"><i>Vates</i> is Latin — the poet-prophet, the one who
+        sees what isn't there yet. That's who we build for.</p>
+      <p class="about__body">Our objects have one job each, done completely, so
+        nothing on your desk asks for the attention that belongs to the vision.
+        No.&thinsp;01, a water bottle in one piece of glass, is the first.</p>
+
+      <div class="about__media">
+        <div class="about__panel">
+          <div class="about__frame">
+            <video id="about-film" controls playsinline preload="metadata"
+                   poster="assets/img/hero-poster.jpg">
+              <source src="assets/video/intro.mp4"  type="video/mp4">
+              <source src="assets/video/intro.webm" type="video/webm">
+            </video>
+            <div class="about__reel" id="about-reel" aria-hidden="true"
+                 data-frame-src="assets/img/reel/{n}.webp"
+                 data-frame-count="32">
+              <img alt="" decoding="async">
+              <img alt="" decoding="async">
+            </div>
+          </div>
+          <p class="about__caption">The film — 24 seconds, plays on your tap.
+            The creators follow it.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ── The bottle ──────────────────────────────────────────── -->
-  <section class="section section--product" id="product">
-    <div class="container">
-      <p class="label">The bottle</p>
-
-      <div class="product__grid">
-        <div class="product__media">
-          <div class="product__stage">
-            <picture>
-              <source srcset="assets/img/no-01.webp" type="image/webp">
-              <img src="assets/img/no-01.jpg" width="1179" height="1102"
-                   sizes="(max-width: 900px) calc(100vw - 2.5rem), 560px"
-                   alt="Two No. 01 bottles — one clear, filled with lemon water, one smoke grey — on a workbench, in front of a designer at work over drawings and a keyboard, the vates wordmark framed on the wall behind.">
-            </picture>
-          </div>
-        </div>
-
-        <div class="product__detail">
-          <h1 class="product__title">No. 01</h1>
-          <p class="product__lead">Simply essential.</p>
-          <p class="product__price">$49</p>
-          <p class="product__spec">One piece of borosilicate glass. A machined
-            steel cap. 32 ounces. Dishwasher safe, and it will outlast the desk
-            you leave it on.</p>
-
-          <form class="purchase" id="purchase-form">
-            <button type="submit" class="btn btn--primary">Purchase</button>
-          </form>
-          <p class="purchase__trust">
-            Free shipping · 30-day returns · Apple&nbsp;Pay and Google&nbsp;Pay
-          </p>
+  <section class="product" id="product">
+    <div class="container product__grid">
+      <div class="product__stage">
+        <div class="product__halo" aria-hidden="true"></div>
+        <img class="product__bottle" src="assets/img/no-01-thumb.webp"
+             width="300" height="975"
+             alt="The No. 01 bottle in smoke grey: a straight-sided glass cylinder with a round shoulder and a machined steel cap.">
+        <div class="product__variants">
+          <span class="chip" aria-current="true">
+            <span class="chip__dot chip__dot--smoke" aria-hidden="true"></span> Smoke
+          </span>
+          <span class="chip chip--soon">
+            <span class="chip__dot chip__dot--clear" aria-hidden="true"></span> Clear — soon
+          </span>
         </div>
       </div>
+
+      <div class="product__detail">
+        <p class="label">The bottle</p>
+        <h2 class="product__title">No.&thinsp;01</h2>
+        <p class="product__claim">One piece of glass, so there is no seam to fail and
+          no liner to taste. Dishwasher safe, and it will outlast the desk you
+          leave it on.</p>
+        <form class="purchase" id="purchase-form">
+          <span class="product__price">$49</span>
+          <button type="submit" class="btn btn--primary">Purchase</button>
+        </form>
+        <p class="purchase__trust">
+          Free shipping · 30-day returns · Apple&nbsp;Pay and Google&nbsp;Pay
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Trusted by ──────────────────────────────────────────
+       Placeholder identities. Every name and portrait here must be
+       replaced with a real creator who has given permission before
+       this section can honestly ship — the silhouettes hold the
+       layout, and the fineprint below the grid says so on the page. -->
+  <section class="trust" id="trust">
+    <div class="container">
+      <div class="trust__head">
+        <p class="label">Trusted by</p>
+        <h2 class="trust__lead">Used by these creators.</h2>
+      </div>
+      <ul class="trust__grid">
+        <li class="trust__card"><svg class="trust__face trust__face--1" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Mara Okonkwo</p><p class="trust__role">Architect</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--2" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Jonas Lindqvist</p><p class="trust__role">Novelist</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--3" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Priya Raman</p><p class="trust__role">Type designer</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--4" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Theo Marchetti</p><p class="trust__role">Film editor</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--5" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">June Nakamura</p><p class="trust__role">Ceramicist</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--6" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Caleb Wright</p><p class="trust__role">Composer</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--4" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Alba Ferreira</p><p class="trust__role">Photographer</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--1" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Dmitri Volkov</p><p class="trust__role">Game designer</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--5" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Noor Haddad</p><p class="trust__role">Illustrator</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--2" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Sam Whitfield</p><p class="trust__role">Luthier</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--6" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Ingrid Larsen</p><p class="trust__role">Choreographer</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--3" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Rafael Ortiz</p><p class="trust__role">Chef</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--2" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Wren Kowalski</p><p class="trust__role">Animator</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--6" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Amara Diallo</p><p class="trust__role">Poet</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--1" viewBox="0 0 64 64" role="img" aria-label="Placeholder portrait"><use href="#avatar-sil"/></svg><p class="trust__name">Eli Zhang</p><p class="trust__role">Industrial designer</p></li>
+      </ul>
+      <p class="trust__fineprint">Placeholder names and portraits — each square awaits a real creator's headshot and permission.</p>
+    </div>
+  </section>
+
+  <!-- ── In hand ─────────────────────────────────────────────── -->
+  <section class="specs" id="specs">
+    <div class="container">
+      <p class="label">In hand</p>
+      <dl class="specs__grid">
+        <div class="specs__cell"><dt>Capacity</dt><dd>32 oz · 950 ml</dd></div>
+        <div class="specs__cell"><dt>Glass</dt><dd>Borosilicate, one piece<small>No seam, no liner</small></dd></div>
+        <div class="specs__cell"><dt>Cap</dt><dd>Machined steel<small>Threads cut, not molded</small></dd></div>
+        <div class="specs__cell"><dt>Care</dt><dd>Dishwasher safe</dd></div>
+        <div class="specs__cell"><dt>Height</dt><dd>—<small>From the spec sheet</small></dd></div>
+        <div class="specs__cell"><dt>Weight</dt><dd>—<small>From the spec sheet</small></dd></div>
+      </dl>
     </div>
   </section>
 
@@ -184,7 +264,6 @@
     <p class="wordmark wordmark--footer">
       <img src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184">
     </p>
-    <p class="site-footer__tagline">For the creators of the world.</p>
     <p class="site-footer__meta">© <span id="year">2026</span> vates — No. 01, open release, numbered by hand.</p>
     <p class="site-footer__links">
       <a href="shipping.html">Shipping &amp; returns</a>
@@ -220,15 +299,13 @@
     <section class="box" id="box-contents" hidden>
       <h3 class="box__title label">What's in the box</h3>
       <ul class="box__list">
-        <li>High Borosilicate Glass Bottle</li>
+        <li>No. 01, one-piece borosilicate glass</li>
         <!-- The wordmark itself, not the word set in type — it is artwork,
-             and the brand rule is that it is never re-set. Lowercase for
-             the same reason, which is why title case skips it. -->
-        <li>Custom <img class="box__mark" src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184"> Notepad</li>
-        <li>Custom <img class="box__mark" src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184"> Pen</li>
-        <li>Wired Earbuds</li>
+             and the brand rule is that it is never re-set. -->
+        <li>A <img class="box__mark" src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184"> notepad — unruled, 60 pages</li>
+        <li>A <img class="box__mark" src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184"> pen</li>
         <li>The &ldquo;Page of Inspiration&rdquo;</li>
-        <li>Welcome Letter</li>
+        <li>A welcome letter, numbered by hand</li>
       </ul>
     </section>
   </div>
