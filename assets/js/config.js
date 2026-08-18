@@ -11,7 +11,7 @@ window.VATES = {
   /* The canonical origin, no trailing slash. Used for the canonical
      link, the sitemap, and the absolute OG image URL that Facebook,
      iMessage, Slack and the rest require. */
-  siteUrl: "https://vates.store",
+  siteUrl: "https://loom-one-lime.vercel.app",
 
   checkout: {
     /* A Stripe Payment Link — https://buy.stripe.com/…
@@ -34,7 +34,7 @@ window.VATES = {
            platforms. Without the redirect the ads cannot be optimised.
          · Adjustable quantity — on. It replaces the stepper that used
            to sit next to the button. */
-    paymentLink: ""
+    paymentLink: "https://buy.stripe.com/test_aFafZh0529pS2Zg34b5Rm00"
   },
 
   /* Paid-ad and creator tracking. Each is optional: an empty string

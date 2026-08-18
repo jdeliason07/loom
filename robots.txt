@@ -1,4 +1,4 @@
-# vates — https://vates.store
+# vates — https://loom-one-lime.vercel.app
 
 User-agent: *
 Allow: /
@@ -7,4 +7,4 @@ Allow: /
 # and has no business in an index.
 Disallow: /thanks.html
 
-Sitemap: https://vates.store/sitemap.xml
+Sitemap: https://loom-one-lime.vercel.app/sitemap.xml
