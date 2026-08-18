@@ -70,9 +70,28 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 2rem;
+  /* 0, not the 2rem it was. scroll-padding insets snap positions as well
+     as anchor jumps, and any inset at all leaves a sliver of the section
+     above showing at the top of a "full screen" one. */
+  scroll-padding-top: 0;
   /* the ground is on the root so the fixed reel can sit above it */
   background: var(--color-bg);
+
+  /* ── Reels-style paging ───────────────────────────────────
+     One section to a screen: let go past the half way mark and
+     the rest of the travel is the browser's, not yours. Mandatory
+     rather than proximity, so there is no resting place between
+     two of them.
+
+     The trap with mandatory is a section taller than the screen —
+     naively it becomes unreachable, because every release snaps
+     back to its start. The spec's own escape hatch is what saves
+     it: where a snap area is taller than the scrollport, every
+     position in which it still covers the scrollport is itself a
+     valid snap position. So the short sections page, and the tall
+     product section scrolls through normally. Nothing is trapped
+     and nothing needs a script. */
+  scroll-snap-type: y mandatory;
 }
 
 body {
@@ -233,6 +252,10 @@ a { color: var(--color-link); }
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
+  scroll-snap-align: start;
+  /* A hard stop: a fast flick moves one screen, never two. This is what
+     separates paging from momentum scrolling that happens to snap. */
+  scroll-snap-stop: always;
 }
 
 /* ── The reel, as hero and as page ground ────────────────────
@@ -388,13 +411,17 @@ a { color: var(--color-link); }
 
 /* ── The wordmark's section ─────────────────────────────────── */
 .statement {
-  min-height: 78vh;
-  min-height: 78svh;
+  /* Was 78svh — three quarters of a screen reads as a gap between two
+     pages rather than as a page. It is one now. */
+  min-height: 100vh;
+  min-height: 100svh;
   display: grid;
   place-content: center;
   justify-items: center;
   text-align: center;
   padding: clamp(4rem, 10vw, 9rem) clamp(1.25rem, 6vw, 4rem);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .statement__tagline {
@@ -430,6 +457,20 @@ a { color: var(--color-link); }
 }
 
 /* ── The bottle ─────────────────────────────────────────────── */
+
+/* A page of its own, centred in it. On a phone the contents run taller
+   than the screen, which is exactly the case the snap rules above are
+   built around: it stays scrollable inside itself. No scroll-snap-stop
+   here — forcing a hard stop on a section you have to scroll through
+   would fight the reading of it. */
+.section--product {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  scroll-snap-align: start;
+}
+
 .product__grid {
   margin-top: clamp(2rem, 4vw, 3.5rem);
   display: grid;
@@ -624,6 +665,11 @@ a { color: var(--color-link); }
 
 /* ── Footer ─────────────────────────────────────────────────── */
 .site-footer {
+  /* Aligned by its end rather than its start: the footer is shorter than
+     a screen, so snapping it to the top would strand it against a field
+     of empty ground. End-aligned, its snap position is simply the bottom
+     of the page. */
+  scroll-snap-align: end;
   border-top: 1px solid var(--color-border);
   /* Was clamp(4rem, 9vw, 8rem), which put 128px of padding around 168px
      of content on a phone and left the page ending in a field of empty
@@ -933,6 +979,10 @@ a { color: var(--color-link); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  /* Paging takes the scroll out of the reader's hands and moves the
+     viewport for them, which is the sort of motion this setting is
+     asking us not to do. */
+  html { scroll-snap-type: none; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;

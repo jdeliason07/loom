@@ -335,6 +335,82 @@
     }
   });
 
+  /* ── Paging with a mouse ─────────────────────────────────────
+     CSS scroll snapping gives a touchscreen exactly what was asked
+     for, because a swipe is one continuous gesture the browser can
+     measure against the half-way mark before it settles.
+
+     A mouse wheel is not one gesture. Each notch is its own scroll of
+     roughly a hundred pixels, which never reaches half a screen, so
+     mandatory snapping pulls every one of them straight back. Measured
+     at a 900px viewport: notches of 100, 120 and 240px all landed back
+     at 0, and three at a human pace did too — the page could not be
+     scrolled at all with a wheel.
+
+     So where the pointer is fine, the wheel is taken over and moves one
+     section per turn. A section taller than the screen is left alone
+     until its far edge is on screen, which is what keeps the product
+     section reading normally rather than paging under the cursor. */
+
+  var PAGES = ".hero, .statement, .section--product";
+  var finePointer = window.matchMedia("(pointer: fine)");
+  var paging = false;
+
+  function onWheel(event) {
+    if (reduceMotion.matches) return;
+    if (event.ctrlKey) return;              // pinch to zoom, not a scroll
+    if (isOpen()) return;                   // the drawer scrolls itself
+    if (Math.abs(event.deltaY) < 4) return; // horizontal or a stray nudge
+
+    var pages = [].slice.call(document.querySelectorAll(PAGES));
+    if (!pages.length) return;
+
+    var y = window.scrollY;
+    var viewport = window.innerHeight;
+    var tops = pages.map(function (el) {
+      return Math.round(el.getBoundingClientRect().top + y);
+    });
+
+    var here = 0;
+    for (var i = 0; i < tops.length; i++) if (y >= tops[i] - 2) here = i;
+
+    var height = pages[here].getBoundingClientRect().height;
+    var bottom = tops[here] + height;
+    var down = event.deltaY > 0;
+
+    /* Still something of this section left to read in the direction of
+       travel: let the browser scroll it the ordinary way. */
+    if (down && y + viewport < bottom - 2) return;
+    if (!down && y > tops[here] + 2) return;
+
+    var next = here + (down ? 1 : -1);
+    /* Past the last section is the footer, which is not a page — let
+       normal scrolling carry on into it. */
+    if (next < 0 || next >= tops.length) return;
+
+    event.preventDefault();
+    if (paging) return;
+    paging = true;
+    window.scrollTo({ top: tops[next], behavior: "smooth" });
+    window.setTimeout(function () { paging = false; }, 520);
+  }
+
+  /* Bound only where it is used, never merely guarded from inside. A
+     non-passive wheel listener takes scrolling off the compositor for
+     the whole document, and on a touch device that was enough on its
+     own to break the CSS snapping this is meant to complement — swipes
+     stopped advancing at all. Nothing is bound unless there is a mouse. */
+  function bindWheel(on) {
+    if (on) document.addEventListener("wheel", onWheel, { passive: false });
+    else document.removeEventListener("wheel", onWheel, { passive: false });
+  }
+
+  bindWheel(finePointer.matches);
+  /* A tablet with a trackpad attached mid-visit, and the reverse. */
+  if (finePointer.addEventListener) {
+    finePointer.addEventListener("change", function (e) { bindWheel(e.matches); });
+  }
+
   /* ── The reel, from hero to page ground ──────────────────────
      At rest the reel is the hero. Scrolling zooms it out to full
      bleed, dims and blurs it back, and — once it has settled —

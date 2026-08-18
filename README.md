@@ -55,6 +55,44 @@ There is no fixed header: nothing needed to live in it, so the page has no top
 chrome at all. The order drawer opens from the Purchase button and closes with
 its own control, Escape, or the backdrop.
 
+## Paging
+
+The page moves a screen at a time, the way a reel does: let go past the half way
+mark and the rest of the travel is the browser's. There is no resting place
+between two sections.
+
+It is CSS, not a script — `scroll-snap-type: y mandatory` on the root, with the
+hero, the wordmark and the bottle each a snap point one viewport tall. The hero
+and the wordmark also carry `scroll-snap-stop: always`, which is what makes a
+hard flick move one screen rather than three.
+
+The known trap with `mandatory` is a section taller than the screen: naively it
+becomes unreachable, because every release snaps back to its start. The spec's
+own escape hatch avoids it — where a snap area is taller than the scrollport,
+every position in which it still covers the scrollport is itself a valid snap
+position. So the two short sections page and the product section, which runs
+past the screen on a phone, scrolls through normally. The footer is aligned by
+its `end` rather than its start, since it is shorter than a screen and snapping
+it to the top would strand it above empty ground.
+
+**A mouse needs help that a finger does not.** A swipe is one continuous gesture
+the browser can measure against the half way mark. A wheel notch is not: each is
+its own scroll of about a hundred pixels, which never reaches half a screen, so
+mandatory snapping cancels every one. Measured at a 900px viewport, notches of
+100, 120 and 240px all landed back at 0 — the page could not be scrolled at all
+with a wheel. So `app.js` takes the wheel over where `(pointer: fine)` matches
+and moves one section per turn, leaving a section taller than the screen alone
+until its far edge is on screen.
+
+That listener is bound only when there is a mouse, never bound-and-guarded from
+inside: a non-passive `wheel` listener takes scrolling off the compositor for
+the whole document, and on a touch device that alone was enough to break the
+snapping it exists to complement.
+
+Under `prefers-reduced-motion` the snapping is off entirely. Paging takes the
+scroll out of the reader's hands and moves the viewport for them, which is the
+kind of motion that setting is asking us not to do.
+
 ## The film and the reel
 
 Two things share the backdrop. `intro.mp4` (H.264) is listed first for Safari
