@@ -211,6 +211,7 @@
      "checkout", "purchase". */
   var NAMES = {
     view:     { meta: "ViewContent",      tiktok: "ViewContent",      ga4: "view_item" },
+    add:      { meta: "AddToCart",        tiktok: "AddToCart",        ga4: "add_to_cart" },
     checkout: { meta: "InitiateCheckout", tiktok: "InitiateCheckout", ga4: "begin_checkout" },
     purchase: { meta: "Purchase",         tiktok: "CompletePayment",  ga4: "purchase" }
   };

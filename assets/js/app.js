@@ -279,12 +279,16 @@
     return true;
   }
 
+  /* Purchase opens the drawer; the drawer's Checkout is what leaves for
+     Stripe. The step in between is not friction for its own sake — it is
+     where "What's in the box" gets read, which is the last thing anyone
+     wants to know before paying. */
   el.form.addEventListener("submit", function (event) {
     event.preventDefault();
     hideNotice();
-    if (goToCheckout()) return;
     addToCart(1);
     openDrawer();
+    if (window.VATES_TRACK) window.VATES_TRACK.track("add");
   });
 
   // drawer line-item controls
@@ -518,15 +522,38 @@
     /* The film plays once, then the reel takes over and loops for the
        rest of the visit. It runs once, and a film that fails to load
        hands over rather than leaving the hero on a dead poster. */
+    /* Leaving for Stripe and coming back is a full page load, and the
+       film played again every time — a brand moment on the way in, an
+       obstacle on the way back to something you were part-way through
+       buying. It is remembered for the tab's lifetime instead: seen
+       once, and every load after that opens on the reel. sessionStorage
+       rather than local, so a genuinely new visit still gets it. */
+    var SEEN_KEY = "vates.film.seen";
+
+    var filmSeen = function () {
+      try { return window.sessionStorage.getItem(SEEN_KEY) === "1"; } catch (e) { return false; }
+    };
+
+    var markSeen = function () {
+      try { window.sessionStorage.setItem(SEEN_KEY, "1"); } catch (e) {}
+    };
+
     var handOver = function () {
       if (handedOver) return;
       handedOver = true;
+      markSeen();
       measure();   // the reel is full bleed where the film was contained
       turn(0);
     };
 
     film.addEventListener("ended", handOver);
     film.addEventListener("error", handOver);
+
+    /* Marked on the first frame played, not on the last. Someone who
+       presses Purchase part-way through the film and comes back from
+       Stripe never reaches "ended" — and they are precisely the person
+       who should not be made to sit through it a second time. */
+    film.addEventListener("playing", markSeen);
 
     var apply = function () {
       queued = false;
@@ -567,6 +594,13 @@
     warm();      // the reel is in cache long before the film hands over to it
     measure();   // intrinsic size may not be known yet — loadedmetadata re-measures
     apply();     // a reload partway down the page starts as the background
+
+    /* Already seen it this visit: stop the film before it starts and go
+       straight to the reel. */
+    if (filmSeen()) {
+      film.pause();
+      handOver();
+    }
   }
 
   /* ── reveal ──────────────────────────────────────────────────

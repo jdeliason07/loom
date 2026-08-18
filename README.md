@@ -63,7 +63,14 @@ and iOS; `intro.webm` (VP9) is there for browsers without H.264. Both are silent
 `hero-poster.jpg` holds the frame until playback starts, and stands in entirely
 if autoplay is refused.
 
-The film plays once. On its `ended` event app.js hands over to the **reel**: 32
+The film plays once a visit, not once a page load. It is marked seen in
+`sessionStorage` on its first played frame — not on `ended`, because someone who
+presses Purchase part-way through and comes back from Stripe never reaches
+`ended`, and they are exactly the person who should not sit through it again.
+Every later load in that tab opens straight on the reel; a genuinely new visit
+still gets the film.
+
+On its `ended` event app.js hands over to the **reel**: 32
 stills cut half a second apart, looping for the rest of the visit — the whole
 reel comes round in about sixteen seconds.
 There is no `loop` attribute on the video on purpose — without `ended` there is
@@ -199,15 +206,16 @@ never fetched, so unused pixels cost nothing at all.
 
 ## The checkout
 
-One tap. Purchase leaves for Stripe on the click — no cart, no account, no page
-of ours in between — and the buyer is back where they came from as soon as
-Stripe redirects them to `thanks.html`. The cart drawer still exists, but only
-as the fallback path when no Payment Link is configured.
+Two taps: Purchase opens the drawer, the drawer's Checkout leaves for Stripe.
+The step in between is not friction for its own sake — it is where "What's in
+the box" gets read, which is the last thing anyone wants to know before paying.
+From Stripe the buyer lands back on `thanks.html` and is done.
 
-Three events are reported: `view` on load (which is what the retargeting
-audiences are built from), `checkout` on the Purchase click, and `purchase` on
-`thanks.html`. Each platform names them differently; the mapping is in one table
-in `track.js` and callers say "view", "checkout", "purchase".
+Four events are reported: `view` on load (what the retargeting audiences are
+built from), `add` when the drawer opens, `checkout` when the Purchase leaves
+for Stripe, and `purchase` on `thanks.html`. Each platform names them
+differently; the mapping is one table in `track.js` and callers say "view",
+"add", "checkout", "purchase".
 
 `thanks.html` reports the list price of one bottle. There is no server here to
 ask Stripe what was actually charged, so a two-bottle order is still reported as
