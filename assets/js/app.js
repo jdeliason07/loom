@@ -1,5 +1,5 @@
 /* ============================================================
-   loom — storefront behaviour
+   VATES — storefront behaviour
    Client-side state only. Nothing is persisted, nothing is sent.
    ============================================================ */
 (function () {

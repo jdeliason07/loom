@@ -1,4 +1,4 @@
-# loom
+# VATES
 
 Single-product storefront for **No. 01** — a one-piece borosilicate glass bottle, $99.
 

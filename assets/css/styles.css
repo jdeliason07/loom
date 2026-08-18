@@ -1,5 +1,5 @@
 /* ============================================================
-   loom — storefront styles
+   VATES — storefront styles
    Components reference the semantic aliases from
    assets/brand/loom-colors.css only (--color-*), never --loom-*.
    The one sanctioned exception is the accent moment the brand
@@ -103,7 +103,7 @@ a { color: var(--color-link); }
 
 /* ── Wordmark ───────────────────────────────────────────────── */
 .wordmark {
-  text-transform: lowercase;
+  text-transform: none;   /* the name is set as written */
   font-style: normal;
   line-height: 1;
 }
