@@ -699,6 +699,10 @@ a { color: var(--color-link); }
   flex: 1;
   overflow-y: auto;
   padding: clamp(1.25rem, 4vw, 2rem);
+  /* A column, so the box list below can be told to take up whatever
+     height the cart has not used. */
+  display: flex;
+  flex-direction: column;
 }
 
 .drawer__empty { color: var(--color-text-muted); font-size: 0.95rem; }
@@ -711,6 +715,12 @@ a { color: var(--color-link); }
   margin-top: clamp(1.75rem, 5vw, 2.5rem);
   padding-top: clamp(1.5rem, 4vw, 2rem);
   border-top: 1px solid var(--color-border);
+  /* Takes the rest of the drawer rather than leaving a pool of empty
+     ground above the total. */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .box__title { display: block; color: var(--color-text-muted); }
@@ -719,15 +729,22 @@ a { color: var(--color-link); }
   margin-top: 1.1rem;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 0.7rem;
+  /* Spread down the available height rather than bunching at the top.
+     The gap is the floor: where the drawer is short, or the cart is
+     long, the items keep their spacing and the body scrolls instead. */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding-bottom: 0.25rem;
 }
 
 .box__list li {
   position: relative;
-  padding-left: 1.4rem;
-  font-size: 0.92rem;
-  line-height: 1.45;
+  padding-left: 1.5rem;
+  font-size: 1.02rem;
+  line-height: 1.4;
   color: var(--color-text-secondary);
 }
 
@@ -738,17 +755,37 @@ a { color: var(--color-link); }
   position: absolute;
   left: 0;
   top: 0.66em;
-  width: 0.7rem;
+  width: 0.8rem;
   height: 1px;
   background: var(--color-text-muted);
 }
 
+/* The wordmark set inline in a line of text. Sized off the type rather
+   than in pixels, so it tracks the list if the size changes, and never
+   recoloured — it is the logo, not an icon. */
+.box__mark {
+  display: inline-block;
+  /* The wordmark is lowercase with one ascender, so a box matched to
+     the type's own height renders its x-height visibly smaller than the
+     words either side of it. Set a little larger to sit level with
+     them. */
+  height: 0.95em;
+  width: auto;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.09em;
+  margin-inline: 0.12em;
+}
+
 .line-item {
   display: grid;
-  /* Narrow, because the thumbnail is one tall bottle rather than the
-     wide desk scene the product section uses. */
-  grid-template-columns: 3rem minmax(0, 1fr);
+  /* Wide enough to actually read the bottle. The frame below is
+     proportioned to the photograph, so this width sets the height. */
+  grid-template-columns: 4rem minmax(0, 1fr);
   gap: 1.25rem;
+  /* The thumbnail is far taller than the two lines beside it, so those
+     sit against its middle rather than its top. */
+  align-items: center;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--color-border);
 }
@@ -764,19 +801,15 @@ a { color: var(--color-link); }
   background: color-mix(in srgb, var(--color-bg) 90%, var(--color-text-primary));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  /* Proportioned to the bottle so the frame hugs it instead of leaving
-     it adrift in the middle of a square. */
-  aspect-ratio: 1 / 2;
-  padding: 0.4rem;
-  display: grid;
-  place-items: center;
+  /* The photograph's own proportions, so the bottle fills the frame
+     edge to edge with no letterboxing and nothing cropped off it. */
+  aspect-ratio: 300 / 975;
   overflow: hidden;
 }
 .line-item__thumb img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .line-item__head {

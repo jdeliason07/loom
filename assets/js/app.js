@@ -8,7 +8,6 @@
   var PRODUCT = {
     id: "no-01",
     name: "No. 01",
-    meta: "Borosilicate · 1 L",
     price: 49,
     /* The drawer shows the bottle on its own, not the desk scene the
        product section uses — at 4.5rem a whole room is a smudge. */
@@ -92,7 +91,6 @@
           '<span class="line-item__name">' + PRODUCT.name + "</span>" +
           '<span class="line-item__price">' + money(line.qty * PRODUCT.price) + "</span>" +
         "</div>" +
-        '<p class="line-item__meta">' + PRODUCT.meta + " · " + money(PRODUCT.price) + " each</p>" +
         '<div class="line-item__controls">' +
           '<div class="stepper" role="group" aria-label="Quantity, ' + PRODUCT.name + '">' +
             '<button type="button" class="stepper__btn" data-line-step="-1" aria-label="Decrease quantity">−</button>' +
