@@ -22,7 +22,6 @@
   var el = {
     year: document.getElementById("year"),
     form: document.getElementById("purchase-form"),
-    qty: document.getElementById("qty"),
     drawer: document.getElementById("order-drawer"),
     backdrop: document.getElementById("drawer-backdrop"),
     close: document.getElementById("drawer-close"),
@@ -223,21 +222,14 @@
 
   if (el.year) el.year.textContent = String(new Date().getFullYear());
 
-  // product stepper
-  el.form.addEventListener("click", function (event) {
-    var button = event.target.closest("[data-step]");
-    if (!button) return;
-    el.qty.value = String(clamp(parseInt(el.qty.value, 10) + Number(button.dataset.step), 1, PRODUCT.max));
-  });
-
-  el.qty.addEventListener("change", function () {
-    el.qty.value = String(clamp(parseInt(el.qty.value, 10), 1, PRODUCT.max));
-  });
-
+  /* Purchase adds a single bottle. Quantity is the drawer's job now —
+     its line-item stepper is the only place it is set, and addToCart
+     tops up the line rather than replacing it, so pressing Purchase
+     again is the same as stepping it up by one. */
   el.form.addEventListener("submit", function (event) {
     event.preventDefault();
     hideNotice();
-    addToCart(clamp(parseInt(el.qty.value, 10), 1, PRODUCT.max));
+    addToCart(1);
     openDrawer();
   });
 

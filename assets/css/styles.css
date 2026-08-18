@@ -148,10 +148,24 @@ a { color: var(--color-link); }
   transition: background-color 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
-/* Accent moment: the primary call to action.
-   Ink is the page ground so it stays dark against the accent. */
+/* Accent moment: the primary call to action, carrying the wordmark's own
+   six bands — the stops and their proportions are lifted straight from
+   the "vates-bands" gradient in assets/brand/vates-wordmark.svg, so the
+   button and the logo are built from one thing. The wordmark itself is
+   still never recoloured; this is the same palette, not the artwork.
+
+   Ink stays the page ground, as it was against the flat accent. The
+   label sits across the top three bands, which are the light ones —
+   see the contrast note in the README before changing the padding or
+   the type size, since that is what decides which bands it crosses. */
 .btn--primary {
-  background: var(--color-accent);
+  background: linear-gradient(to bottom,
+    #76b856 0 37.77%,
+    #f2ba4b 37.77% 49.18%,
+    #e3873d 49.18% 61.68%,
+    #cf4743 61.68% 73.64%,
+    #8b4192 73.64% 85.60%,
+    #4698d3 85.60% 100%);
   color: var(--color-bg);
 }
 .btn--primary:hover { transform: translateY(-1px); }

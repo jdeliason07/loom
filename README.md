@@ -18,7 +18,7 @@ python3 -m http.server 8000   # → http://localhost:8000
 index.html                     the whole page
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
-assets/js/app.js               quantity stepper, order drawer, cart state, reveal
+assets/js/app.js               the reel, order drawer, cart state, reveal
 assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
 assets/video/intro.mp4/.webm   the intro film — plays once on load
 assets/img/reel/01–32.webp     the reel of stills the film hands over to
@@ -41,7 +41,7 @@ empty and the output directory as the root.
 2. **The wordmark** — its own near-full-height section (`.statement`), so the
    gradient arrives after you scroll down from the video. It fades up as it
    enters view; under `prefers-reduced-motion` it is simply there.
-3. **The bottle** — photograph, price, quantity, Purchase.
+3. **The bottle** — photograph, price, Purchase.
 4. **Footer.**
 
 There is no fixed header: nothing needed to live in it, so the page has no top
@@ -126,7 +126,19 @@ cap than the 560px on `.product__stage` and its grid track.
   traced outline filled with the six colour bands the logo is built from
   (#76b856, #f2ba4b, #e3873d, #cf4743, #8b4192, #4698d3). It is always
   lowercase, never tracked, stretched or italicized, and never recoloured.
-  The primary CTA uses `--color-accent`; accents appear nowhere else.
+- The primary CTA carries those same six bands, in the same proportions,
+  lifted from the `vates-bands` gradient in the wordmark SVG — the button and
+  the logo are built from one thing. It is the only place the bands appear
+  outside the wordmark itself, and it is the palette being reused, not the
+  artwork. `--color-accent` is no longer on the button; it is left for focus
+  and links.
+
+  The label is dark ink (`--color-bg`), and which bands it crosses is decided
+  by the button's height — the type sits across green, gold and orange, the
+  three light ones, with red, purple and blue below it. Measured on the
+  rendered button, the worst contrast under any row of the glyphs is 5.73:1
+  against a 4.5:1 requirement. Changing the padding or the type size moves the
+  label onto the darker bands, so re-measure if you do.
 - One family for all type, `--font`: Helvetica where it is installed, Inter
   served as the fallback everywhere else, then Arial. The only tracked
   treatment left is `.label`, uppercase at 0.18em.
@@ -137,9 +149,14 @@ Dark is the shipped theme. `loom-colors.css` carries a `[data-theme="light"]`
 block, but no toggle is wired up: the wordmark's gradient is tuned for the Void
 background and loses contrast on light. If a toggle is added later, the
 primary button's ink (`color: var(--color-bg)`) needs an explicit dark override,
-since the accent stays blue in both themes.
+since the bands are the same in both themes.
 
 ## Cart behaviour
+
+Purchase adds one bottle. Quantity is set in the drawer, on the line-item
+stepper, which is the only stepper on the page — `addToCart` tops the line up
+rather than replacing it, so pressing Purchase a second time is the same as
+stepping the line up by one.
 
 State lives in memory only — no storage, no persistence, no backend. Checkout
 is inert by design: it reports that the storefront is a demonstration and takes
