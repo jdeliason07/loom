@@ -241,6 +241,7 @@ a { color: var(--color-link); }
 .reel {
   position: absolute;
   inset: 0;
+  --reel-fade: 140ms;   /* the dissolve between cuts; see FRAME_MS in app.js */
   transform: scale(calc(1 + (var(--bg-cover) - 1) * var(--bg-p)));
   transform-origin: 50% 50%;
   opacity: calc(1 - 0.68 * var(--bg-p));
@@ -255,9 +256,22 @@ a { color: var(--color-link); }
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 1200ms ease;
+  z-index: 0;
+  /* The picture going out is held at full opacity underneath and then
+     dropped in place once the incoming one has covered it. Fading both
+     at once would dip to the background between every pair — a slow
+     dissolve can carry that, half-second cuts read it as a flicker. */
+  transition-property: opacity;
+  transition-duration: 0ms;
+  transition-delay: var(--reel-fade);
 }
-.reel__frame.is-current { opacity: 1; }
+
+.reel__frame.is-current {
+  opacity: 1;
+  z-index: 1;                                /* the incoming picture is always on top */
+  transition-duration: var(--reel-fade);
+  transition-delay: 0ms;
+}
 
 /* The pictures run from a tall scroll to a wide panorama, so cropping
    them all to the shape of the screen would cut the subject out of half

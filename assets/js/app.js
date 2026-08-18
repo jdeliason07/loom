@@ -302,7 +302,11 @@
     var settled = false;
     var timer = null;
 
-    var FRAME_MS = 3600;   // how long each picture holds before the next
+    /* Half a second a picture: fast cutting, not a slideshow. The
+       dissolve between them is --reel-fade in the stylesheet and has to
+       stay well inside this. Reduced motion gets a slow reel instead —
+       at this cadence the cuts are the motion. */
+    var FRAME_MS = reduceMotion.matches ? 4000 : 500;
     var OVERSCAN = 1.06;   // keeps the background blur off the viewport edge
 
     /* The film is laid out contained — a panel on wide screens, the
@@ -389,12 +393,17 @@
       });
     };
 
-    /* Warm the next picture while this one holds, so the crossfade does
-       not have to wait on the network to start. */
-    var prefetch = function () {
-      if (frames.length < 2) return;
-      var next = new Image();
-      next.src = frames[(cursor + 1) % frames.length];
+    /* At two pictures a second there is no room to fetch one between
+       cuts, so the whole reel is pulled into cache up front and the film
+       plays over the top of it, buying the time. Detached Images are
+       enough — the cache is what the slots actually read from, and a
+       picture that fails here fails again in turn(), where it is
+       dropped from the reel. */
+    var warm = function () {
+      frames.forEach(function (src) {
+        var img = new Image();
+        img.src = src;
+      });
     };
 
     var hold = function () {
@@ -427,7 +436,6 @@
            if none of them load, the hero holds the last frame of the film
            rather than cutting to black. */
         backdrop.classList.add("is-reel");
-        prefetch();
         hold();
       })["catch"](function () {
         frames.splice(index, 1);
@@ -485,6 +493,7 @@
     window.addEventListener("resize", function () { measure(); schedule(); });
     film.addEventListener("loadedmetadata", measure);
 
+    warm();      // the reel is in cache long before the film hands over to it
     measure();   // intrinsic size may not be known yet — loadedmetadata re-measures
     apply();     // a reload partway down the page starts as the background
   }
