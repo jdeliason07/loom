@@ -372,6 +372,10 @@
         reel.appendChild(node);
       });
 
+      /* The reel can be cropped to fill the screen; the intro cannot,
+         without cutting the lines of type off its top and bottom. */
+      backdrop.classList.add("is-reel");
+
       reel.load();
       measure();                   // the reel is not the shape the intro was
       start();

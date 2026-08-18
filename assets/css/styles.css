@@ -203,17 +203,33 @@ a { color: var(--color-link); }
   transition: filter 700ms ease;
 }
 
-/* Wider than the footage: filling the screen means upscaling one face to
-   1440px. The reel opens as a panel at its own proportions, and only
-   grows to full bleed once it has stopped being the thing you look at. */
+/* Desktop: the backdrop is the whole screen. The intro is contained
+   inside it — it is portrait and the screen is not, so cropping it to
+   fill would cut 46% of its height, and that is exactly where "for the
+   creators of the world" and "what will you create?" sit. Black behind
+   it, so the letterbox reads as film rather than as a gap. */
 @media (min-width: 900px) {
   .backdrop__video {
-    width: auto;
-    height: min(88svh, 100%);
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
     object-fit: contain;
     background: #000;
-    border-radius: calc(var(--radius-lg) * (1 - var(--bg-p)));
+    border-radius: 0;
+  }
+}
+
+/* The reel is cut to 16:9 and every still fills its frame, so on a wide
+   screen it covers with almost nothing lost — that is the state the hero
+   comes to rest in, and it fills the screen. Not on phones: covering a
+   16:9 reel on a portrait screen would throw 74% of the width away, so
+   there it stays contained, whole and unzoomed. */
+@media (min-width: 900px) {
+  .backdrop.is-reel .backdrop__video {
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
   }
 }
 
@@ -237,16 +253,6 @@ a { color: var(--color-link); }
       var(--color-bg) 100%);
 }
 
-/* The panel treatment carries its own edges, so the scrim only lands
-   the very bottom of the section into the page. */
-@media (min-width: 900px) {
-  .backdrop__scrim {
-    background: linear-gradient(to bottom,
-      transparent 0%,
-      transparent 88%,
-      var(--color-bg) 100%);
-  }
-}
 
 /* Background state: the veil that keeps the site legible over the reel. */
 .backdrop__wash {
