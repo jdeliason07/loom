@@ -1,0 +1,10 @@
+# vates — https://vates.store
+
+User-agent: *
+Allow: /
+
+# The confirmation page carries a Stripe session id in its query string
+# and has no business in an index.
+Disallow: /thanks.html
+
+Sitemap: https://vates.store/sitemap.xml

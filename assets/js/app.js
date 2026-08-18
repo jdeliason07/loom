@@ -222,13 +222,48 @@
 
   if (el.year) el.year.textContent = String(new Date().getFullYear());
 
-  /* Purchase adds a single bottle. Quantity is the drawer's job now —
-     its line-item stepper is the only place it is set, and addToCart
-     tops up the line rather than replacing it, so pressing Purchase
-     again is the same as stepping it up by one. */
+  /* Fires once on load. It is what the ad platforms build their
+     retargeting audiences from — everyone who saw the bottle and did
+     not buy it yet. */
+  if (window.VATES_TRACK) window.VATES_TRACK.track("view");
+
+  /* The shortest path there is from the advert to the receipt. With a
+     Payment Link configured, Purchase leaves for Stripe on the click —
+     no cart, no account, no page of ours in between — and Stripe's own
+     receipt email is the confirmation. The attribution token rides
+     along as client_reference_id, so the sale lands in the dashboard
+     already credited to whoever sent them.
+
+     With no link configured it falls back to the demonstration drawer,
+     so the button is never dead while the storefront is being set up. */
+  function checkoutUrl() {
+    var checkout = (window.VATES && window.VATES.checkout) || {};
+    var link = checkout.paymentLink || "";
+    if (!link) return "";
+    var ref = "";
+    try {
+      ref = (window.VATES_TRACK && window.VATES_TRACK.reference()) || "";
+    } catch (e) {}
+    if (!ref) return link;
+    return link + (link.indexOf("?") < 0 ? "?" : "&") +
+      "client_reference_id=" + encodeURIComponent(ref);
+  }
+
+  function goToCheckout() {
+    var url = checkoutUrl();
+    if (!url) return false;
+    if (window.VATES_TRACK) window.VATES_TRACK.track("checkout");
+    /* The pixels queue their beacons synchronously but send them a tick
+       later; a sixtieth of a second is under the threshold of noticing
+       and is the difference between a counted click and a lost one. */
+    window.setTimeout(function () { window.location.href = url; }, 60);
+    return true;
+  }
+
   el.form.addEventListener("submit", function (event) {
     event.preventDefault();
     hideNotice();
+    if (goToCheckout()) return;
     addToCart(1);
     openDrawer();
   });
@@ -260,6 +295,7 @@
 
   // checkout is inert by design
   el.checkout.addEventListener("click", function () {
+    if (goToCheckout()) return;
     showNotice("This is a demonstration only — no payment is taken and no order is placed.");
   });
 
@@ -367,6 +403,7 @@
     var slots = reelEl.querySelectorAll(".reel__frame");
     var idle = 1;      // the slot the next picture is decoded into
     var cursor = -1;   // how far through `frames` the reel has got
+    var warmed = 0;    // how many have been pulled into cache so far
 
     /* Settled once the picture is loaded and decoded, so it is never
        faded up half-drawn. decode() only smooths the paint; load and
@@ -392,10 +429,32 @@
        picture that fails here fails again in turn(), where it is
        dropped from the reel. */
     var warm = function () {
-      frames.forEach(function (src) {
+      /* Warming all 32 is right on a desk and wrong on a phone on
+         cellular: it is roughly 2.5 MB before anyone has decided to buy
+         anything. Where the browser will say — Data Saver on, or a
+         connection it reports as 2g/3g — only the opening handful are
+         fetched, and the rest arrive as the reel reaches them. The reel
+         degrades to a slower first pass rather than to nothing. */
+      var link = navigator.connection || {};
+      var thrifty = link.saveData === true ||
+        /^(slow-)?2g$/.test(link.effectiveType || "") ||
+        link.effectiveType === "3g";
+      var take = thrifty ? Math.min(6, frames.length) : frames.length;
+      frames.slice(0, take).forEach(function (src) {
         var img = new Image();
         img.src = src;
       });
+      warmed = take;
+    };
+
+    /* Whatever warm() left behind is picked up as the reel advances, so
+       a thrifty connection still ends up with the whole reel — just
+       paid for a frame at a time instead of all at once. */
+    var warmNext = function () {
+      if (warmed >= frames.length) return;
+      var img = new Image();
+      img.src = frames[warmed];
+      warmed += 1;
     };
 
     var hold = function () {
@@ -428,6 +487,7 @@
            if none of them load, the hero holds the last frame of the film
            rather than cutting to black. */
         backdrop.classList.add("is-reel");
+        warmNext();
         hold();
       })["catch"](function () {
         frames.splice(index, 1);

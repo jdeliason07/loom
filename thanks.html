@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Order confirmed — vates</title>
+<meta name="description" content="Your No. 01 is on its way.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#2e251b">
+<!-- A confirmation page has no business in an index, and carries a
+     session id in its URL that certainly does not. -->
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="icon" href="assets/brand/vates-mark.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+<link rel="stylesheet" href="assets/brand/loom-colors.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+
+<script src="assets/js/config.js" defer></script>
+<script src="assets/js/track.js" defer></script>
+</head>
+<body class="page">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main class="page__main" id="main">
+  <div class="container page__inner">
+
+    <p class="wordmark wordmark--page">
+      <img src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184">
+    </p>
+
+    <h1 class="page__title">That's it.</h1>
+
+    <p class="page__lead">
+      Your No. 01 is paid for and on its way. The receipt is landing in your
+      inbox now — it is your order confirmation, so keep hold of it.
+    </p>
+
+    <p class="page__note" id="order-ref"></p>
+
+    <p class="page__actions">
+      <a class="btn btn--primary" href="./">Done</a>
+    </p>
+
+    <p class="page__note">
+      Anything at all — just reply to the receipt.
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__meta">© <span id="year">2026</span> vates</p>
+    <p class="site-footer__links">
+      <a href="shipping.html">Shipping &amp; returns</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  document.getElementById("year").textContent = String(new Date().getFullYear());
+
+  /* This is the whole point of the redirect. Every ad platform needs the
+     conversion reported from a page the buyer actually lands on after
+     paying, and without it the campaigns have nothing to optimise
+     towards — they can count clicks but not sales.
+
+     The value sent is the list price of one bottle. There is no server
+     here to ask Stripe what was actually charged, so a two-bottle order
+     is still reported as ninety-nine dollars. Under-reporting is the
+     safe direction to be wrong in, and the exact figures are in Stripe.
+     A webhook into the Conversions API is the fix when it is worth it. */
+  function report() {
+    if (!window.VATES_TRACK) return;
+    var params = new URLSearchParams(window.location.search);
+    /* Only ever fire on a real return from Stripe. Someone opening this
+       page directly, or refreshing it, must not book a second sale. */
+    if (!params.get("session_id")) return;
+    if (sessionStorage.getItem("vates.reported") === params.get("session_id")) return;
+    try { sessionStorage.setItem("vates.reported", params.get("session_id")); } catch (e) {}
+    window.VATES_TRACK.track("purchase");
+  }
+
+  /* Shown so a customer with a question has something to quote, and so
+     the creator credit is visible on the page it was earned on. */
+  function showReference() {
+    var ref = "";
+    try { ref = window.VATES_TRACK ? window.VATES_TRACK.reference() : ""; } catch (e) {}
+    var node = document.getElementById("order-ref");
+    var session = new URLSearchParams(window.location.search).get("session_id");
+    if (!session) { node.textContent = ""; return; }
+    node.textContent = "Reference " + session.slice(-12) + (ref ? " · " + ref : "");
+  }
+
+  /* config.js and track.js are deferred, so they are ready by
+     DOMContentLoaded but not before this inline script parses. */
+  document.addEventListener("DOMContentLoaded", function () {
+    report();
+    showReference();
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -6,6 +6,42 @@
    vates-wordmark.svg, and carries its own colour.
    ============================================================ */
 
+/* ── Inter, served from here ─────────────────────────────────
+   Self-hosted on purpose. Loaded from fonts.googleapis.com this was
+   a render-blocking request to a third party: measured here, a page
+   whose font request hung took 12,875ms to DOMContentLoaded against
+   95ms when it did not — a blank page for anyone behind a network
+   that blocks or throttles Google. Three weights, latin only, is the
+   whole of what this page sets; unicode-range keeps even those from
+   being fetched for text that does not need them.
+   ------------------------------------------------------------ */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/inter-400-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/inter-500-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/inter-600-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   /* One family for all type. The wordmark is set in Helvetica; where it
      is not installed, Inter is the closest neo-grotesque we can serve. */
@@ -436,6 +472,24 @@ a { color: var(--color-link); }
   color: var(--color-text-primary);
 }
 
+/* What someone actually wants to know before spending ninety-nine
+   dollars, in the place they are deciding. */
+.product__spec {
+  margin-top: 1rem;
+  max-width: 34ch;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* The three things that stop a hand hovering over the button. Set
+   quietly: it is reassurance, not a second sales pitch. */
+.purchase__trust {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
 .purchase {
   margin-top: clamp(1.5rem, 3vw, 2rem);
   display: flex;
@@ -479,6 +533,84 @@ a { color: var(--color-link); }
 }
 .stepper__input::-webkit-outer-spin-button,
 .stepper__input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+
+/* ── Plain pages ────────────────────────────────────────────
+   Confirmation, 404, and the three the payment processor requires.
+   No reel, no backdrop — they are read, not looked at, so they sit
+   on the ground colour and keep a measure narrow enough to follow.
+   ------------------------------------------------------------ */
+.page {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page__main {
+  flex: 1;
+  padding-block: clamp(4rem, 12vw, 9rem);
+}
+
+.page__inner { max-width: 68ch; }
+
+.wordmark--page { width: min(220px, 45vw); }
+.wordmark--page img { width: 100%; height: auto; }
+
+.page__title {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.page__lead {
+  margin-top: 1.25rem;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.page__actions { margin-top: clamp(2rem, 4vw, 2.75rem); }
+.page__actions .btn { display: inline-block; text-decoration: none; }
+
+.page__note {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* The legal pages. Long-form and rarely read, but they have to be
+   legible when they are — and Stripe will not switch an account on
+   without them. */
+.prose { margin-top: clamp(2rem, 5vw, 3rem); }
+.prose h2 {
+  margin-top: 2.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.prose p, .prose li {
+  margin-top: 0.9rem;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.prose ul { margin-top: 0.5rem; padding-left: 1.2rem; }
+.prose a { color: var(--color-text-primary); }
+.prose__updated {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.site-footer__links {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  font-size: 0.82rem;
+}
+.site-footer__links a { color: var(--color-text-muted); text-decoration: none; }
+.site-footer__links a:hover { color: var(--color-text-secondary); }
 
 /* ── Footer ─────────────────────────────────────────────────── */
 .site-footer {

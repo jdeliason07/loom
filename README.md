@@ -15,7 +15,14 @@ python3 -m http.server 8000   # → http://localhost:8000
 ## Layout
 
 ```
-index.html                     the whole page
+index.html                     the storefront
+thanks.html                    order confirmation — fires the Purchase event
+shipping.html privacy.html terms.html    the three Stripe asks for
+404.html  robots.txt  sitemap.xml  site.webmanifest  favicon.ico
+assets/js/config.js            THE ONLY FILE TO EDIT TO GO LIVE
+assets/js/track.js             attribution and the ad pixels
+assets/fonts/inter-*.woff2     Inter, self-hosted, three weights
+assets/img/og.jpg              the 1200x630 share card
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
 assets/js/app.js               the reel, order drawer, cart state, reveal
@@ -162,13 +169,83 @@ left intact if a toggle is ever added. If a toggle is added later, the
 primary button's ink (`color: var(--color-bg)`) needs an explicit dark override,
 since the bands are the same in both themes.
 
+## Going live
+
+Everything below is set in `assets/js/config.js`. There is no build step and no
+secret anywhere in this repository — every identifier involved is public by
+design.
+
+**1. The domain.** Set `siteUrl`, then change the same origin in the three
+places that cannot read it from JavaScript, because crawlers do not run any:
+the `canonical`/`og:*` tags at the top of every page, `sitemap.xml`, and
+`robots.txt`. It is `https://vates.store` throughout at the moment.
+
+**2. Stripe.** Create a Payment Link for No. 01 and paste it into
+`checkout.paymentLink`. In the link's own settings:
+
+| Setting | Value | Why |
+|---|---|---|
+| Wallets — Apple Pay, Google Pay, Link | on | This is the whole of the twenty seconds. A returning iPhone buyer double-clicks and never types. |
+| Receipts | on | Stripe's receipt **is** the order confirmation. There is no server here to send one. |
+| After payment → redirect | `<siteUrl>/thanks.html?session_id={CHECKOUT_SESSION_ID}` | Without it no Purchase conversion is ever reported and the ad platforms have nothing to optimise towards. |
+| Adjustable quantity | on | It replaces the stepper that used to sit beside the button. |
+
+Until a link is pasted, Purchase falls back to the demonstration drawer, so an
+unconfigured checkout can never present a dead button.
+
+**3. Pixels.** Fill in whichever of `pixels.meta`, `pixels.tiktok` and
+`pixels.ga4` you are using. An empty string means that platform's script is
+never fetched, so unused pixels cost nothing at all.
+
+## The checkout
+
+One tap. Purchase leaves for Stripe on the click — no cart, no account, no page
+of ours in between — and the buyer is back where they came from as soon as
+Stripe redirects them to `thanks.html`. The cart drawer still exists, but only
+as the fallback path when no Payment Link is configured.
+
+Three events are reported: `view` on load (which is what the retargeting
+audiences are built from), `checkout` on the Purchase click, and `purchase` on
+`thanks.html`. Each platform names them differently; the mapping is in one table
+in `track.js` and callers say "view", "checkout", "purchase".
+
+`thanks.html` reports the list price of one bottle. There is no server here to
+ask Stripe what was actually charged, so a two-bottle order is still reported as
+$99 — under-reporting, which is the safe direction, and the true figures are in
+Stripe. A webhook into the Conversions API is the fix when the ad spend
+justifies it.
+
+## Knowing which creator sold it
+
+Give a creator a link with a tag on it:
+
+```
+https://vates.store/?ref=janedoe
+https://vates.store/?utm_source=tiktok&utm_medium=paid_social&utm_campaign=launch-aug
+```
+
+`ref`, `creator`, `via` and `aff` are all accepted, so whatever a partner
+improvises still lands somewhere. `track.js` keeps the **first** touch in
+`localStorage` and the last in `sessionStorage`, and only a tagged visit may
+write first touch — an untagged return can never overwrite the creator who found
+the customer in the first place.
+
+On Purchase, that becomes Stripe's `client_reference_id`:
+
+```
+src_tiktok__med_paid-social__cmp_launch-aug__ref_janedoe__t_1787048629
+```
+
+which is readable on the payment itself in the Stripe dashboard. That is the
+point: the credit is attached to the money, not only to a page view in an
+analytics tool, so whoever is paying creators can sort the payments list and
+settle up from it directly.
+
+Platform click IDs (`fbclid`, `ttclid`, `gclid` and friends) are captured and
+kept too. The pixels do not need them — they match on their own cookies — but a
+future server-side Conversions API will.
+
 ## Cart behaviour
 
-Purchase adds one bottle. Quantity is set in the drawer, on the line-item
-stepper, which is the only stepper on the page — `addToCart` tops the line up
-rather than replacing it, so pressing Purchase a second time is the same as
-stepping the line up by one.
-
-State lives in memory only — no storage, no persistence, no backend. Checkout
-is inert by design: it reports that the storefront is a demonstration and takes
-no payment.
+The drawer is the fallback path only. State lives in memory; the attribution in
+`track.js` is the one thing that persists, and clearing browser data removes it.
