@@ -56,9 +56,9 @@ and iOS; `intro.webm` (VP9) is there for browsers without H.264. Both are silent
 `hero-poster.jpg` holds the frame until playback starts, and stands in entirely
 if autoplay is refused.
 
-The film plays once. On its `ended` event app.js hands over to the **reel**: 30
+The film plays once. On its `ended` event app.js hands over to the **reel**: 32
 stills cut half a second apart, looping for the rest of the visit — the whole
-reel comes round in about fifteen seconds.
+reel comes round in about sixteen seconds.
 There is no `loop` attribute on the video on purpose — without `ended` there is
 no handover — and a film that fails to load fires `error`, which hands over too
 rather than leaving the hero on a dead poster.
@@ -122,6 +122,15 @@ cap than the 560px on `.product__stage` and its grid track.
 - `loom-colors.css` is imported globally, once, ahead of `styles.css`, and is
   kept verbatim. Components reference only the semantic aliases
   (`--color-bg`, `--color-text-primary`, …), never the raw `--loom-*` names.
+- The page ground is this site's own, not the brand's: `styles.css` re-points
+  `--color-bg` to #2e251b, a dark brown, under `[data-theme="dark"]`. The Void
+  is still the Void — the brand file is untouched — this page just does not sit
+  on it. The `theme-color` meta in `index.html` tracks the same value.
+
+  Only `--color-bg` moved. `--color-bg-elevated` is still Graphite, which is a
+  cool grey against a warm ground; it shows on the drawer, the notice and the
+  line-item thumbs. It reads as a neutral dark panel rather than a clash, but
+  a warmer elevated tone is the obvious next move if it starts to look wrong.
 - The wordmark is artwork, not type: `assets/brand/vates-wordmark.svg`, a
   traced outline filled with the six colour bands the logo is built from
   (#76b856, #f2ba4b, #e3873d, #cf4743, #8b4192, #4698d3). It is always
@@ -145,9 +154,11 @@ cap than the 560px on `.product__stage` and its grid track.
 - Corner radii come from `--radius-sm/md/lg` in `styles.css`; nothing is
   square.
 
-Dark is the shipped theme. `loom-colors.css` carries a `[data-theme="light"]`
-block, but no toggle is wired up: the wordmark's gradient is tuned for the Void
-background and loses contrast on light. If a toggle is added later, the
+Dark is the shipped theme, and `<html>` carries `data-theme="dark"` outright.
+`loom-colors.css` carries a `[data-theme="light"]` block, but no toggle is wired
+up: the wordmark's gradient is tuned for a dark ground and loses contrast on
+light. The ground override is scoped to `[data-theme="dark"]` so that block is
+left intact if a toggle is ever added. If a toggle is added later, the
 primary button's ink (`color: var(--color-bg)`) needs an explicit dark override,
 since the bands are the same in both themes.
 

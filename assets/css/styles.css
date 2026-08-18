@@ -19,6 +19,15 @@
   --bg-cover: 1;   /* scale that takes the reel to full bleed */
 }
 
+/* The page ground. loom-colors.css is kept verbatim, so this site's own
+   ground is set here rather than by editing the brand file — the Void is
+   still the Void, this page just no longer sits on it. Scoped to the
+   dark theme so the (unwired) light block in loom-colors.css is left
+   intact; styles.css loads second, so this wins on source order. */
+[data-theme="dark"] {
+  --color-bg: #2e251b;
+}
+
 /* ── Reset / base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
