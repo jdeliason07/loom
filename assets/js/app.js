@@ -313,6 +313,33 @@
       root.style.setProperty("--bg-cover", coverScale().toFixed(4));
     };
 
+    /* Autoplay is a request, not a guarantee: iOS refuses it outright in
+       Low Power Mode, Low Data Mode does the same, and a per-site setting
+       can too. The reel is pointer-events: none, so the play button iOS
+       paints over the poster is not tappable either — left alone, a
+       refused hero stays one still frame for the whole visit. Ask again
+       on the first gesture anywhere on the page, and whenever the tab
+       comes back to the foreground. */
+    var start = function () {
+      if (progress >= 1 || !reel.paused) return;
+      reel.muted = true;   // unattended playback is only ever allowed muted
+      var playing = reel.play();
+      if (playing && typeof playing.catch === "function") playing.catch(function () {});
+    };
+
+    /* These stay bound for the life of the page rather than being torn
+       down on first play: start() is a no-op once the reel is running,
+       and leaving them means a reel stalled or paused later — coming
+       back from the background, a mid-visit refusal — heals on the next
+       touch instead of staying stuck. */
+    ["touchstart", "pointerdown", "click", "keydown"].forEach(function (type) {
+      document.addEventListener(type, start, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) start();
+    });
+
     var apply = function () {
       queued = false;
 
@@ -331,9 +358,7 @@
       if (next === 1) {
         reel.pause();
       } else if (reel.paused) {
-        var playing = reel.play();
-        // autoplay can be refused; the poster frame stands in for it
-        if (playing && typeof playing.catch === "function") playing.catch(function () {});
+        start();
       }
     };
 
