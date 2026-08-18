@@ -415,17 +415,21 @@
      At rest the reel is the hero. Scrolling zooms it out to full
      bleed, dims and blurs it back, and — once it has settled —
      stops it: one still picture behind the rest of the site.
-     Scroll back to the top and it picks up where it left off. --- */
+     Scroll back to the top and it picks up where it left off.
+
+     There was an intro film in front of all this that played once and
+     handed over on its "ended" event. It is gone, and with it the
+     handover, the sessionStorage that stopped it playing twice in a
+     tab, and the listeners that re-asked for autoplay after iOS
+     refused it. The reel is the hero from the first paint. ------- */
 
   var backdrop = document.getElementById("backdrop");
-  var film = document.getElementById("backdrop-video");
   var reelEl = document.getElementById("reel");
 
-  if (backdrop && film && reelEl) {
-    var root = document.documentElement;
+  if (backdrop && reelEl) {
+    var root = document.documentElement;   // --bg-p lives here
     var progress = -1;
     var queued = false;
-    var handedOver = false;
     var settled = false;
     var timer = null;
 
@@ -436,52 +440,18 @@
        stylesheet and the caption's own handover is timed off it; both
        have to stay well inside this. Reduced motion gets a slow reel. */
     var FRAME_MS = reduceMotion.matches ? 4000 : 1500;
-    var OVERSCAN = 1.06;   // keeps the background blur off the viewport edge
 
-    /* The film is laid out contained — a panel on wide screens, the
-       viewport on narrow ones — so the scale that takes it to full bleed
-       has to be measured. The reel is full bleed already: the overscan
-       is the whole of its cover. */
-    var coverScale = function () {
-      if (handedOver) return OVERSCAN;
-      var width = film.offsetWidth;
-      var height = film.offsetHeight;
-      if (!width || !height) return 1;
-      return Math.max(window.innerWidth / width, window.innerHeight / height) * OVERSCAN;
-    };
-
-    var measure = function () {
-      root.style.setProperty("--bg-cover", coverScale().toFixed(4));
-    };
-
-    /* Autoplay is a request, not a guarantee: iOS refuses it outright in
-       Low Power Mode, Low Data Mode does the same, and a per-site setting
-       can too. The film is pointer-events: none, so the play button iOS
-       paints over the poster is not tappable either — left alone, a
-       refused hero stays one still frame for the whole visit. Ask again
-       on the first gesture anywhere on the page, and whenever the tab
-       comes back to the foreground. */
-    var start = function () {
-      if (handedOver || progress >= 1 || !film.paused) return;
-      film.muted = true;   // unattended playback is only ever allowed muted
-      var playing = film.play();
-      if (playing && typeof playing.catch === "function") playing.catch(function () {});
-    };
-
-    /* These stay bound for the life of the page rather than being torn
-       down on first play: start() is a no-op once the film is running,
-       and leaving them means a film stalled or paused later — coming
-       back from the background, a mid-visit refusal — heals on the next
-       touch instead of staying stuck. */
-    ["touchstart", "pointerdown", "click", "keydown"].forEach(function (type) {
-      document.addEventListener(type, start, { passive: true });
-    });
+    /* The zoom out to the background used to be measured, because the
+       film was laid out contained — a panel on wide screens, the
+       viewport on narrow ones — and the scale that took it to full bleed
+       depended on its own size. The reel is full bleed already, so the
+       overscan is the whole of it and it is a constant: --bg-zoom in the
+       stylesheet. Nothing here has to measure anything any more. */
 
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) {
         window.clearTimeout(timer);   // a backgrounded tab holds its picture
       } else {
-        start();
         hold();
       }
     });
@@ -589,11 +559,15 @@
       });
     };
 
-    /* At two pictures a second there is no room to fetch one between
-       cuts, so the whole reel is pulled into cache up front and the film
-       plays over the top of it, buying the time. Detached Images are
-       enough — the cache is what the slots actually read from, and a
-       picture that fails here fails again in turn(), where it is
+    /* There is no room to fetch a picture between cuts, and no film in
+       front of the reel to buy the time any more, so the whole of it is
+       pulled into cache while the first picture — preloaded in the head,
+       so it is the first thing painted — holds the screen. It is called
+       after turn(0) rather than before it for that reason: thirty-two
+       requests queued ahead of the one picture anybody is waiting on
+       would be thirty-two requests in its way. Detached
+       Images are enough: the cache is what the slots actually read from,
+       and a picture that fails here fails again in turn(), where it is
        dropped from the reel. */
     var warm = function () {
       /* Warming all 32 is right on a desk and wrong on a phone on
@@ -626,7 +600,7 @@
 
     var hold = function () {
       window.clearTimeout(timer);
-      if (!handedOver || settled || document.hidden || frames.length < 2) return;
+      if (settled || document.hidden || frames.length < 2) return;
       timer = window.setTimeout(function () { turn(0); }, FRAME_MS);
     };
 
@@ -650,9 +624,10 @@
         slots[idle].classList.add("is-current");
         slots[1 - idle].classList.remove("is-current");
         idle = 1 - idle;
-        /* The film only steps aside once a picture has actually landed:
-           if none of them load, the hero holds the last frame of the film
-           rather than cutting to black. */
+        /* Set once the first picture has actually landed, not before: it
+           is what fades the quote up, and there is nothing to put a quote
+           under until there is a picture. If none of them load it is
+           never set, and the hero is the page's own ground. */
         backdrop.classList.add("is-reel");
         say(frames[index]);   // the quote turns with the picture, not before it
         warmNext();
@@ -663,42 +638,6 @@
         turn(tried + 1);
       });
     };
-
-    /* The film plays once, then the reel takes over and loops for the
-       rest of the visit. It runs once, and a film that fails to load
-       hands over rather than leaving the hero on a dead poster. */
-    /* Leaving for Stripe and coming back is a full page load, and the
-       film played again every time — a brand moment on the way in, an
-       obstacle on the way back to something you were part-way through
-       buying. It is remembered for the tab's lifetime instead: seen
-       once, and every load after that opens on the reel. sessionStorage
-       rather than local, so a genuinely new visit still gets it. */
-    var SEEN_KEY = "vates.film.seen";
-
-    var filmSeen = function () {
-      try { return window.sessionStorage.getItem(SEEN_KEY) === "1"; } catch (e) { return false; }
-    };
-
-    var markSeen = function () {
-      try { window.sessionStorage.setItem(SEEN_KEY, "1"); } catch (e) {}
-    };
-
-    var handOver = function () {
-      if (handedOver) return;
-      handedOver = true;
-      markSeen();
-      measure();   // the reel is full bleed where the film was contained
-      turn(0);
-    };
-
-    film.addEventListener("ended", handOver);
-    film.addEventListener("error", handOver);
-
-    /* Marked on the first frame played, not on the last. Someone who
-       presses Purchase part-way through the film and comes back from
-       Stripe never reaches "ended" — and they are precisely the person
-       who should not be made to sit through it a second time. */
-    film.addEventListener("playing", markSeen);
 
     var apply = function () {
       queued = false;
@@ -718,10 +657,8 @@
       if (next === 1) {
         settled = true;
         window.clearTimeout(timer);
-        film.pause();
       } else {
         settled = false;
-        start();
         hold();
       }
     };
@@ -733,19 +670,11 @@
     };
 
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", function () { measure(); schedule(); });
-    film.addEventListener("loadedmetadata", measure);
+    window.addEventListener("resize", schedule);
 
-    warm();      // the reel is in cache long before the film hands over to it
-    measure();   // intrinsic size may not be known yet — loadedmetadata re-measures
     apply();     // a reload partway down the page starts as the background
-
-    /* Already seen it this visit: stop the film before it starts and go
-       straight to the reel. */
-    if (filmSeen()) {
-      film.pause();
-      handOver();
-    }
+    turn(0);     // the reel is running from the first paint
+    warm();      // and the rest of it is fetched behind the picture on screen
   }
 
   /* ── reveal ──────────────────────────────────────────────────

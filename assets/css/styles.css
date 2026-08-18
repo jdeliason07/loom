@@ -50,9 +50,14 @@
   --radius-md: 14px;   /* small panels: thumbs, notices */
   --radius-lg: 22px;   /* cards and surfaces */
 
-  /* Driven by app.js: the reel's journey from hero to page ground. */
-  --bg-p: 0;       /* 0 = hero, 1 = settled as the background */
-  --bg-cover: 1;   /* scale that takes the reel to full bleed */
+  /* The reel's journey from hero to page ground. --bg-p is driven by
+     app.js; --bg-zoom is the overscan it travels to, which keeps the
+     background blur off the viewport edge. That was measured while there
+     was an intro film in front of the reel, because the film was laid
+     out contained and its cover scale depended on its own size. The reel
+     is full bleed already, so it is a constant and lives here. */
+  --bg-p: 0;         /* 0 = hero, 1 = settled as the background */
+  --bg-zoom: 1.06;   /* the scale it is held at once settled */
 }
 
 /* The page ground. loom-colors.css is kept verbatim, so this site's own
@@ -110,7 +115,7 @@ body.is-locked { overflow: hidden; }
 /* Everything on the page rides above the reel. */
 main, .site-footer { position: relative; z-index: 1; }
 
-img, svg, video { display: block; max-width: 100%; }
+img, svg { display: block; max-width: 100%; }
 button, input { font: inherit; color: inherit; }
 
 /* component display rules must not out-specify the hidden attribute */
@@ -261,7 +266,7 @@ a { color: var(--color-link); }
 /* ── The reel, as hero and as page ground ────────────────────
    At rest it is the hero. Scrolling zooms it out to full bleed,
    dims and blurs it back, and leaves it there — one paused frame
-   behind the whole site. app.js drives --bg-p and --bg-cover. -- */
+   behind the whole site. app.js drives --bg-p. ------------------ */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -273,63 +278,20 @@ a { color: var(--color-link); }
   pointer-events: none;
 }
 
-/* Phones and other portrait screens: the reel is near square and the
-   screen is not, so filling the viewport would crop 47% of the frame
-   away horizontally. It lands to the width of the screen instead and
-   keeps its own proportions — the whole frame, centred, nothing cut.
-   Sizing the element to the footage rather than the viewport is also
-   what lets coverScale() measure it for the background state. */
-.backdrop__video {
-  width: 100%;
-  height: auto;
-  max-height: 100%;
-  object-fit: contain;
-  transform: scale(calc(1 + (var(--bg-cover) - 1) * var(--bg-p)));
+/* ── The reel of stills ──────────────────────────────────────
+   The whole of the backdrop now: there was an intro film sitting
+   over it, contained and letterboxed on black, which played once
+   and dissolved into this. Its rules went with it. ----------- */
+.reel {
+  position: absolute;
+  inset: 0;
+  --reel-fade: 400ms;   /* the dissolve between cuts; see FRAME_MS in app.js */
+  transform: scale(calc(1 + (var(--bg-zoom) - 1) * var(--bg-p)));
   transform-origin: 50% 50%;
   opacity: calc(1 - 0.68 * var(--bg-p));
   will-change: transform, opacity;
   /* Blur is switched, not scrolled — a per-frame blur radius is the one
      part of this that a laptop cannot keep at 60fps. */
-  transition: filter 700ms ease;
-}
-
-/* Desktop: the backdrop is the whole screen. The intro is contained
-   inside it — it is portrait and the screen is not, so cropping it to
-   fill would cut 46% of its height, and that is exactly where "for the
-   creators of the world" and "what will you create?" sit. Black behind
-   it, so the letterbox reads as film rather than as a gap. */
-@media (min-width: 900px) {
-  .backdrop__video {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: contain;
-    background: #000;
-    border-radius: 0;
-  }
-}
-
-/* Once a picture has landed the reel covers the screen, so the film
-   underneath is faded out — after the crossfade has brought the first
-   frame up, not before, so the handover reads as a dissolve rather than
-   a cut to black. */
-.backdrop.is-reel .backdrop__video {
-  opacity: 0;
-  transition: opacity 600ms ease 900ms;
-}
-
-/* ── The reel of stills ──────────────────────────────────────
-   Carries the same zoom, dim and blur as the film, so the
-   journey from hero to page ground is unchanged. ------------- */
-.reel {
-  position: absolute;
-  inset: 0;
-  --reel-fade: 400ms;   /* the dissolve between cuts; see FRAME_MS in app.js */
-  transform: scale(calc(1 + (var(--bg-cover) - 1) * var(--bg-p)));
-  transform-origin: 50% 50%;
-  opacity: calc(1 - 0.68 * var(--bg-p));
-  will-change: transform, opacity;
   transition: filter 700ms ease;
 }
 
@@ -377,10 +339,9 @@ a { color: var(--color-link); }
 
 .reel__pic { object-fit: contain; }
 
-.backdrop.is-background .backdrop__video,
 .backdrop.is-background .reel { filter: blur(18px) saturate(0.8) brightness(0.92); }
 
-/* Hero framing: lands the panel into the page. Fades out as the reel
+/* Hero framing: lands the picture into the page. Fades out as the reel
    takes over the background, where there is no edge left to hide. */
 .backdrop__scrim {
   position: absolute;
@@ -434,8 +395,8 @@ a { color: var(--color-link); }
   align-items: flex-end;
   justify-content: center;
   text-align: center;
-  /* Nothing to show until the film has handed over; .is-reel is set on
-     the first picture that actually lands. */
+  /* Nothing to show until there is a picture to show it under; .is-reel
+     is set on the first frame that actually lands. */
   opacity: 0;
   transition: opacity 700ms ease;
 }

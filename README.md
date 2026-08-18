@@ -27,9 +27,7 @@ assets/brand/loom-colors.css   the brand color system — imported first, unmodi
 assets/css/styles.css          storefront styles
 assets/js/app.js               the reel, order drawer, cart state, reveal
 assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
-assets/video/intro.mp4/.webm   the intro film — plays once on load
-assets/img/reel/01–32.webp     the reel of stills the film hands over to
-assets/img/hero-poster.jpg     first frame, shown until the intro starts
+assets/img/reel/01–32.webp     the reel of stills the hero is made of
 assets/img/no-01.webp/.jpg     the No. 01 photograph — the pair, on a desk in use
 ```
 
@@ -44,9 +42,9 @@ empty and the output directory as the root.
 
 ## Page order
 
-1. **Hero** — the film, then the reel, full viewport, with nothing over it.
+1. **Hero** — the reel, full viewport, with nothing over it.
 2. **The wordmark** — its own near-full-height section (`.statement`), so the
-   gradient arrives after you scroll down from the video. It fades up as it
+   gradient arrives after you scroll down from the hero. It fades up as it
    enters view; under `prefers-reduced-motion` it is simply there.
 3. **The bottle** — photograph, price, Purchase.
 4. **Footer.**
@@ -93,35 +91,30 @@ Under `prefers-reduced-motion` the snapping is off entirely. Paging takes the
 scroll out of the reader's hands and moves the viewport for them, which is the
 kind of motion that setting is asking us not to do.
 
-## The film and the reel
+## The reel
 
-Two things share the backdrop. `intro.mp4` (H.264) is listed first for Safari
-and iOS; `intro.webm` (VP9) is there for browsers without H.264. Both are silent
-— the audio track is stripped, which is also what lets the video autoplay.
-`hero-poster.jpg` holds the frame until playback starts, and stands in entirely
-if autoplay is refused.
+The backdrop is the **reel**: 32 stills cut a second and a half apart, running
+from the first paint and looping for the rest of the visit — the whole reel
+comes round in about forty-eight seconds.
 
-The film plays once a visit, not once a page load. It is marked seen in
-`sessionStorage` on its first played frame — not on `ended`, because someone who
-presses Purchase part-way through and comes back from Stripe never reaches
-`ended`, and they are exactly the person who should not sit through it again.
-Every later load in that tab opens straight on the reel; a genuinely new visit
-still gets the film.
+There was an intro film in front of it, `intro.mp4` / `.webm`, which played once
+a visit and dissolved into the reel on its `ended` event. It is gone, and so is
+everything it needed: the poster frame, the `sessionStorage` key that stopped it
+playing twice in one tab, the listeners that re-asked for autoplay after iOS
+refused it, and the measuring of its contained size to find the scale that took
+it to full bleed. The reel is full bleed already, so that scale is now the
+constant `--bg-zoom` in the stylesheet and nothing measures anything. It is
+about 3.8 MB less to download and a good deal less to go wrong.
 
-On its `ended` event app.js hands over to the **reel**: 32
-stills cut a second and a half apart, looping for the rest of the visit — the
-whole reel comes round in about forty-eight seconds.
-There is no `loop` attribute on the video on purpose — without `ended` there is
-no handover — and a film that fails to load fires `error`, which hands over too
-rather than leaving the hero on a dead poster.
+The first frame is preloaded in the head at `fetchpriority="high"`, because with
+nothing in front of it that picture is the first thing painted. The rest of the
+reel is pulled into cache while it holds the screen.
 
 The reel is two `<img>` slots taking turns (`.reel__frame`). The next picture is
 loaded and decoded into the idle slot before it is faded up, so a frame is never
-seen half-drawn. There is not much room to fetch one between cuts, so the whole
-reel is pulled into cache when the page loads and the film plays over the top of
-it, buying the time. A picture that will not load is
-dropped from the reel rather than left as a gap in it; if none of them load,
-`.is-reel` is never set and the hero simply holds the last frame of the film.
+seen half-drawn. A picture that will not load is dropped from the reel rather
+than left as a gap in it; if none of them load, `.is-reel` is never set and the
+hero is the page's own ground.
 
 The cut itself is not a symmetrical crossfade. The outgoing picture is held at
 full opacity underneath and dropped in place only once the incoming one has
@@ -141,21 +134,32 @@ picks up where it left off. A backgrounded tab holds its picture too.
 
 ## The quotes
 
-Most of the reel is a person, and under each of them is something they said.
-The quotes are declared in `index.html`, in the `#reel-captions` JSON block, for
-the same reason the pictures are named there: changing a quote, or moving one
-from one frame to another, is an edit to the markup and not to `app.js`. The key
-is the frame's two-digit number, so it is the filename — `07` is
-`assets/img/reel/07.webp`.
+Thirteen of the reel's pictures carry something the person in them said. The
+quotes are declared in `index.html`, in the `#reel-captions` JSON block, for the
+same reason the pictures are named there: changing a quote, or moving one from
+one frame to another, is an edit to the markup and not to `app.js`. The key is
+the frame's two-digit number, so it is the filename — `08` is
+`assets/img/reel/08.webp`.
 
-The value is a *list*, because several frames hold more than one person: The
-School of Athens is Plato and Aristotle, the podium in Mexico City is three men,
-Iwo Jima is six. A frame with a list takes the next entry each time it comes
-round, so one loop of the reel credits Plato and the next credits Aristotle —
-better than picking one and dropping the rest. Ten frames have no entry at all
-(the Declaration, Earthrise, the wall coming down, the Nike memo) and show no
-quote; the wash goes with it, so there is no shadow across the bottom of a
-picture with nothing to read on it.
+Every entry carries a `src`: the primary source the quote is taken from — a
+letter, a transcript, a dated address. Nothing reads that field. It is there so
+that adding a quote means finding its source first, which is the whole of what
+keeps the list honest.
+
+It started at thirty and lost seventeen to that rule. "E pur si muove" was not
+written down until 124 years after Galileo's trial. "We are what we repeatedly
+do" is Will Durant summarising Aristotle, not Aristotle. "God must have loved
+the common man" is Lincoln's, not Nimitz's. Five lines put into the mouths of
+the men on Suribachi are not recorded as having been said by any of them. A
+quote that cannot be sourced does not go under a real person's face.
+
+The value is a *list*, because a frame can hold more than one person: The School
+of Athens is Plato and Aristotle, Iwo Jima is six men. A frame with a list takes
+the next entry each time it comes round, rather than picking one and dropping
+the rest — no frame needs it at present, but the reel is a set of group
+photographs and the next sourced quote may well land on one. Nineteen frames
+have no entry and show none; the wash goes with them, so there is no shadow
+across the bottom of a picture with nothing to read on it.
 
 The quote and the picture turn together — `say()` is called from the same
 `then()` that swaps the slots, so a line is never left under the wrong face. The
@@ -180,15 +184,8 @@ each one holds — 1500ms, or 4s under `prefers-reduced-motion`, where the cuts
 would otherwise be the motion — and `--reel-fade` on `.reel` is the dissolve
 between them, which wants to stay well inside `FRAME_MS`.
 
-**Film** — replace `assets/video/intro.mp4` / `.webm` and `hero-poster.jpg`:
-
-```sh
-ffmpeg -i source.mov -an -r 30 -c:v libx264 -pix_fmt yuv420p -crf 24 \
-  -preset slow -movflags +faststart assets/video/intro.mp4
-ffmpeg -i source.mov -an -r 30 -c:v libvpx-vp9 -crf 36 -b:v 0 -row-mt 1 \
-  assets/video/intro.webm
-ffmpeg -ss 0.1 -i source.mov -frames:v 1 assets/img/hero-poster.jpg
-```
+Frame `01` is preloaded by name in the head; renumbering the reel means
+changing that line too.
 
 **Product photo** — `no-01.webp` with a `no-01.jpg` fallback, served full-bleed
 from `.product__stage`; the photograph's own ground becomes a plate against the
