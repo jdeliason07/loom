@@ -23,20 +23,35 @@
 
 <!-- ── The reel: hero first, then the ground the whole site sits on ──
      The intro film plays once on load; when it ends app.js hands over to
-     the reel of faces, which loops for the rest of the visit. No loop
-     attribute here on purpose — without "ended" there is no handover.
-     app.js drives --bg-p from 0 (hero) to 1 (paused background). -->
+     the reel of stills, which crossfades from one picture to the next and
+     loops for the rest of the visit. No loop attribute on the video on
+     purpose — without "ended" there is no handover. app.js drives --bg-p
+     from 0 (hero) to 1 (paused background).
+
+     The reel names its pictures here rather than in app.js: data-frame-src
+     is the path with {n} standing in for a two-digit number, counted from
+     01 up to data-frame-count. The two slots take turns, so the next picture
+     is decoded into the idle one before it is faded up; each holds the
+     picture whole over a blurred copy of itself. -->
 <div class="backdrop" id="backdrop" aria-hidden="true">
   <video class="backdrop__video" id="backdrop-video" autoplay muted playsinline
          preload="metadata" tabindex="-1"
-         poster="assets/img/hero-poster.jpg"
-         data-loop-wide-mp4="assets/video/reel-wide.mp4"
-         data-loop-wide-webm="assets/video/reel-wide.webm"
-         data-loop-tall-mp4="assets/video/reel-tall.mp4"
-         data-loop-tall-webm="assets/video/reel-tall.webm">
+         poster="assets/img/hero-poster.jpg">
     <source src="assets/video/intro.mp4"  type="video/mp4">
     <source src="assets/video/intro.webm" type="video/webm">
   </video>
+  <div class="reel" id="reel"
+       data-frame-src="assets/img/reel/{n}.webp"
+       data-frame-count="30">
+    <div class="reel__frame">
+      <img class="reel__blur" alt="" decoding="async">
+      <img class="reel__pic" alt="" decoding="async">
+    </div>
+    <div class="reel__frame">
+      <img class="reel__blur" alt="" decoding="async">
+      <img class="reel__pic" alt="" decoding="async">
+    </div>
+  </div>
   <div class="backdrop__scrim"></div>
   <div class="backdrop__wash"></div>
 </div>

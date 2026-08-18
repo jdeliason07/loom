@@ -286,27 +286,35 @@
 
   /* ── The reel, from hero to page ground ──────────────────────
      At rest the reel is the hero. Scrolling zooms it out to full
-     bleed, dims and blurs it back, and — once it has settled — pauses
-     it: one still frame behind the rest of the site. Scroll back to
-     the top and it picks up where it left off. ------------------- */
+     bleed, dims and blurs it back, and — once it has settled —
+     stops it: one still picture behind the rest of the site.
+     Scroll back to the top and it picks up where it left off. --- */
 
   var backdrop = document.getElementById("backdrop");
-  var reel = document.getElementById("backdrop-video");
+  var film = document.getElementById("backdrop-video");
+  var reelEl = document.getElementById("reel");
 
-  if (backdrop && reel) {
+  if (backdrop && film && reelEl) {
     var root = document.documentElement;
     var progress = -1;
     var queued = false;
+    var handedOver = false;
+    var settled = false;
+    var timer = null;
 
-    /* The reel is laid out contained (a panel on wide screens, the
-       viewport on narrow ones); this is the scale that takes it to full
-       bleed. The 6% of overscan keeps the blur from feathering the
-       edges of the viewport in. */
+    var FRAME_MS = 3600;   // how long each picture holds before the next
+    var OVERSCAN = 1.06;   // keeps the background blur off the viewport edge
+
+    /* The film is laid out contained — a panel on wide screens, the
+       viewport on narrow ones — so the scale that takes it to full bleed
+       has to be measured. The reel is full bleed already: the overscan
+       is the whole of its cover. */
     var coverScale = function () {
-      var width = reel.offsetWidth;
-      var height = reel.offsetHeight;
+      if (handedOver) return OVERSCAN;
+      var width = film.offsetWidth;
+      var height = film.offsetHeight;
       if (!width || !height) return 1;
-      return Math.max(window.innerWidth / width, window.innerHeight / height) * 1.06;
+      return Math.max(window.innerWidth / width, window.innerHeight / height) * OVERSCAN;
     };
 
     var measure = function () {
@@ -315,21 +323,21 @@
 
     /* Autoplay is a request, not a guarantee: iOS refuses it outright in
        Low Power Mode, Low Data Mode does the same, and a per-site setting
-       can too. The reel is pointer-events: none, so the play button iOS
+       can too. The film is pointer-events: none, so the play button iOS
        paints over the poster is not tappable either — left alone, a
        refused hero stays one still frame for the whole visit. Ask again
        on the first gesture anywhere on the page, and whenever the tab
        comes back to the foreground. */
     var start = function () {
-      if (progress >= 1 || !reel.paused) return;
-      reel.muted = true;   // unattended playback is only ever allowed muted
-      var playing = reel.play();
+      if (handedOver || progress >= 1 || !film.paused) return;
+      film.muted = true;   // unattended playback is only ever allowed muted
+      var playing = film.play();
       if (playing && typeof playing.catch === "function") playing.catch(function () {});
     };
 
     /* These stay bound for the life of the page rather than being torn
-       down on first play: start() is a no-op once the reel is running,
-       and leaving them means a reel stalled or paused later — coming
+       down on first play: start() is a no-op once the film is running,
+       and leaving them means a film stalled or paused later — coming
        back from the background, a mid-visit refusal — heals on the next
        touch instead of staying stuck. */
     ["touchstart", "pointerdown", "click", "keydown"].forEach(function (type) {
@@ -337,59 +345,109 @@
     });
 
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) start();
+      if (document.hidden) {
+        window.clearTimeout(timer);   // a backgrounded tab holds its picture
+      } else {
+        start();
+        hold();
+      }
     });
 
-    /* The intro film plays once, then the reel of faces takes over and
-       loops for the rest of the visit. The markup stays the only place
-       that names a file; the handover reads them off the element. It runs
-       once, and an intro that fails to load hands over rather than
-       leaving the hero on a dead poster. */
-    var handedOver = false;
+    /* ── The reel of stills ──────────────────────────────────────
+       The pictures are named in the markup, not here: data-frame-src
+       is the path with {n} standing in for a two-digit number,
+       counted from 01 up to data-frame-count. ------------------- */
+    var frames = (function () {
+      var list = [];
+      var template = reelEl.getAttribute("data-frame-src");
+      var count = parseInt(reelEl.getAttribute("data-frame-count"), 10);
+      if (!template || !(count > 0)) return list;
+      for (var i = 1; i <= count; i++) {
+        list.push(template.replace("{n}", (i < 10 ? "0" : "") + i));
+      }
+      return list;
+    })();
 
-    var handOver = function () {
-      if (handedOver) return;
+    var slots = reelEl.querySelectorAll(".reel__frame");
+    var idle = 1;      // the slot the next picture is decoded into
+    var cursor = -1;   // how far through `frames` the reel has got
 
-      /* Two cuts of the same reel: a wide one framed for a landscape
-         screen, and a tall one for a phone, where the pictures sit whole
-         over a blurred copy of themselves rather than being cropped to a
-         shape they were never shot in. Chosen once, here, off the same
-         breakpoint the stylesheet uses. */
-      var wide = window.matchMedia && window.matchMedia("(min-width: 900px)").matches;
-      var key = wide ? "wide" : "tall";
-      var formats = [
-        [reel.getAttribute("data-loop-" + key + "-mp4"), "video/mp4"],
-        [reel.getAttribute("data-loop-" + key + "-webm"), "video/webm"]
-      ].filter(function (pair) { return !!pair[0]; });
-      if (!formats.length) return;
-
-      handedOver = true;
-      reel.loop = true;            // the reel is where the hero comes to rest
-      reel.removeAttribute("poster");
-
-      /* Swap the <source> list rather than assigning src: src would win
-         over the children and throw the fallback away, leaving anything
-         that cannot decode H.264 on a dead frame. This way the browser
-         goes on picking the format it can actually play. */
-      while (reel.firstChild) reel.removeChild(reel.firstChild);
-      formats.forEach(function (pair) {
-        var node = document.createElement("source");
-        node.setAttribute("src", pair[0]);
-        node.setAttribute("type", pair[1]);
-        reel.appendChild(node);
+    /* Settled once the picture is loaded and decoded, so it is never
+       faded up half-drawn. decode() only smooths the paint; load and
+       error are what decide whether the picture is there at all. An
+       image already in cache is complete before either can fire. */
+    var ready = function (img) {
+      return new Promise(function (resolve, reject) {
+        if (img.complete) {
+          if (img.naturalWidth) resolve(); else reject();
+          return;
+        }
+        img.onload = resolve;
+        img.onerror = reject;
+      }).then(function () {
+        return img.decode ? img.decode().catch(function () {}) : null;
       });
-
-      /* The reel can be cropped to fill the screen; the intro cannot,
-         without cutting the lines of type off its top and bottom. */
-      backdrop.classList.add("is-reel");
-
-      reel.load();
-      measure();                   // the reel is not the shape the intro was
-      start();
     };
 
-    reel.addEventListener("ended", handOver);
-    reel.addEventListener("error", handOver);
+    /* Warm the next picture while this one holds, so the crossfade does
+       not have to wait on the network to start. */
+    var prefetch = function () {
+      if (frames.length < 2) return;
+      var next = new Image();
+      next.src = frames[(cursor + 1) % frames.length];
+    };
+
+    var hold = function () {
+      window.clearTimeout(timer);
+      if (!handedOver || settled || document.hidden || frames.length < 2) return;
+      timer = window.setTimeout(function () { turn(0); }, FRAME_MS);
+    };
+
+    /* Bring the next picture up in the idle slot, then swap which slot is
+       showing. A picture that will not load is dropped from the reel
+       rather than left as a gap in it; `tried` stops the search when none
+       of them will load. */
+    var turn = function (tried) {
+      if (!frames.length || tried > frames.length) return;
+
+      cursor = (cursor + 1) % frames.length;
+      var index = cursor;
+      var slot = slots[idle];
+      var pic = slot.querySelector(".reel__pic");
+      var blur = slot.querySelector(".reel__blur");
+
+      pic.src = frames[index];
+      blur.src = frames[index];   // the same file, so it costs one request
+
+      ready(pic).then(function () {
+        slots[idle].classList.add("is-current");
+        slots[1 - idle].classList.remove("is-current");
+        idle = 1 - idle;
+        /* The film only steps aside once a picture has actually landed:
+           if none of them load, the hero holds the last frame of the film
+           rather than cutting to black. */
+        backdrop.classList.add("is-reel");
+        prefetch();
+        hold();
+      })["catch"](function () {
+        frames.splice(index, 1);
+        cursor = index - 1;
+        turn(tried + 1);
+      });
+    };
+
+    /* The film plays once, then the reel takes over and loops for the
+       rest of the visit. It runs once, and a film that fails to load
+       hands over rather than leaving the hero on a dead poster. */
+    var handOver = function () {
+      if (handedOver) return;
+      handedOver = true;
+      measure();   // the reel is full bleed where the film was contained
+      turn(0);
+    };
+
+    film.addEventListener("ended", handOver);
+    film.addEventListener("error", handOver);
 
     var apply = function () {
       queued = false;
@@ -407,9 +465,13 @@
       backdrop.classList.toggle("is-background", next > 0.28);
 
       if (next === 1) {
-        reel.pause();
-      } else if (reel.paused) {
+        settled = true;
+        window.clearTimeout(timer);
+        film.pause();
+      } else {
+        settled = false;
         start();
+        hold();
       }
     };
 
@@ -421,7 +483,7 @@
 
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", function () { measure(); schedule(); });
-    reel.addEventListener("loadedmetadata", measure);
+    film.addEventListener("loadedmetadata", measure);
 
     measure();   // intrinsic size may not be known yet — loadedmetadata re-measures
     apply();     // a reload partway down the page starts as the background
