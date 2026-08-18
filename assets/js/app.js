@@ -88,8 +88,9 @@
       "</div>" +
       "<div>" +
         '<div class="line-item__head">' +
-          '<span class="line-item__name">' + PRODUCT.name + "</span>" +
-          '<span class="line-item__price">' + money(line.qty * PRODUCT.price) + "</span>" +
+          '<span class="line-item__name">' + PRODUCT.name +
+            '<span class="line-item__aka">\u2009\u2014\u2009\u201cThe Bottle\u201d</span>' +
+          "</span>" +
         "</div>" +
         '<div class="line-item__controls">' +
           '<div class="stepper" role="group" aria-label="Quantity, ' + PRODUCT.name + '">' +
