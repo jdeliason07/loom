@@ -154,19 +154,21 @@ a { color: var(--color-link); }
    button and the logo are built from one thing. The wordmark itself is
    still never recoloured; this is the same palette, not the artwork.
 
-   Ink stays the page ground, as it was against the flat accent. The
-   label sits across the top three bands, which are the light ones —
-   see the contrast note in the README before changing the padding or
-   the type size, since that is what decides which bands it crosses. */
+   With the bands equal the label lands mid-ramp, across orange and red,
+   rather than on the light ones — so the ink is true black rather than
+   the page ground. Red is the band that decides it: #14171A over it is
+   3.97:1, black is 4.64:1, and 4.5:1 is the bar. See the contrast note
+   in the README before changing the padding or the type size, since
+   that is what decides which bands the label crosses. */
 .btn--primary {
   background: linear-gradient(to bottom,
-    #76b856 0 37.77%,
-    #f2ba4b 37.77% 49.18%,
-    #e3873d 49.18% 61.68%,
-    #cf4743 61.68% 73.64%,
-    #8b4192 73.64% 85.60%,
-    #4698d3 85.60% 100%);
-  color: var(--color-bg);
+    #76b856 0 16.667%,
+    #f2ba4b 16.667% 33.333%,
+    #e3873d 33.333% 50%,
+    #cf4743 50% 66.667%,
+    #8b4192 66.667% 83.333%,
+    #4698d3 83.333% 100%);
+  color: #000;
 }
 .btn--primary:hover { transform: translateY(-1px); }
 .btn--primary:active { transform: translateY(0); }

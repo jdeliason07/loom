@@ -126,19 +126,19 @@ cap than the 560px on `.product__stage` and its grid track.
   traced outline filled with the six colour bands the logo is built from
   (#76b856, #f2ba4b, #e3873d, #cf4743, #8b4192, #4698d3). It is always
   lowercase, never tracked, stretched or italicized, and never recoloured.
-- The primary CTA carries those same six bands, in the same proportions,
-  lifted from the `vates-bands` gradient in the wordmark SVG — the button and
-  the logo are built from one thing. It is the only place the bands appear
-  outside the wordmark itself, and it is the palette being reused, not the
-  artwork. `--color-accent` is no longer on the button; it is left for focus
-  and links.
+- The primary CTA carries those same six colours, one sixth of the button
+  each — the wordmark's own bands are uneven (green is 38% of it), which reads
+  as a mistake at button size. It is the only place the bands appear outside
+  the wordmark itself, and it is the palette being reused, not the artwork.
+  `--color-accent` is no longer on the button; it is left for focus and links.
 
-  The label is dark ink (`--color-bg`), and which bands it crosses is decided
-  by the button's height — the type sits across green, gold and orange, the
-  three light ones, with red, purple and blue below it. Measured on the
-  rendered button, the worst contrast under any row of the glyphs is 5.73:1
-  against a 4.5:1 requirement. Changing the padding or the type size moves the
-  label onto the darker bands, so re-measure if you do.
+  The label is true black rather than `--color-bg`, and red is the band that
+  decides it. Equal bands put the type mid-ramp, across orange and red, where
+  the page ground is 3.97:1 — under the bar — and black is 4.64:1. Measured on
+  the rendered button rather than calculated: worst contrast under any row of
+  the glyphs is 4.64:1 against a 4.5:1 requirement, so the margin is thin.
+  Changing the padding, the type size or the band order moves the label onto
+  different bands; re-measure if you do.
 - One family for all type, `--font`: Helvetica where it is installed, Inter
   served as the fallback everywhere else, then Arial. The only tracked
   treatment left is `.label`, uppercase at 0.18em.
