@@ -1,12 +1,15 @@
 /* ============================================================
-   VATES — storefront styles
+   vates — storefront styles
    Components reference the semantic aliases from
    assets/brand/loom-colors.css only (--color-*), never --loom-*.
-   The one sanctioned exception is the accent moment the brand
-   system names directly: the hero wordmark (.loom-gradient-text).
+   The wordmark is no longer type: it is artwork, assets/brand/
+   vates-wordmark.svg, and carries its own colour.
    ============================================================ */
 
 :root {
+  /* One family for all type. The wordmark is set in Helvetica; where it
+     is not installed, Inter is the closest neo-grotesque we can serve. */
+  --font: "Helvetica Neue", Helvetica, "Inter", Arial, sans-serif;
   --radius-sm: 10px;   /* controls: buttons, inputs, steppers */
   --radius-md: 14px;   /* small panels: thumbs, notices */
   --radius-lg: 22px;   /* cards and surfaces */
@@ -31,7 +34,7 @@ body {
   margin: 0;
   background: transparent;
   color: var(--color-text-primary);
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font);
   font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -85,14 +88,14 @@ a { color: var(--color-link); }
 .product__price,
 .drawer__title,
 .wordmark {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: var(--font);
   font-weight: 500;
   letter-spacing: normal;   /* never tracked */
   text-transform: none;     /* never all-caps */
 }
 
 .label {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font);
   font-weight: 400;
   font-size: 0.7rem;
   letter-spacing: 0.18em;
@@ -120,13 +123,16 @@ a { color: var(--color-link); }
 /* Gradient treatment, at hero scale, on the Void — the one place the
    brand system allows it. It gets a section to itself. */
 .wordmark--hero {
-  display: inline-block;
-  font-size: clamp(4.75rem, 19vw, 15rem);
-  line-height: 0.92;
-  padding: 0.08em 0.1em;   /* clear space */
+  display: block;
+  width: min(78vw, 880px);
+  margin-inline: auto;
+  padding: 0.08em 0;   /* clear space */
 }
 
-.wordmark--footer { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+.wordmark--footer { width: clamp(150px, 24vw, 250px); }
+
+/* The mark is one piece of artwork at every size. */
+.wordmark img { display: block; width: 100%; height: auto; }
 
 /* ── Buttons ────────────────────────────────────────────────── */
 .btn {
@@ -134,7 +140,7 @@ a { color: var(--color-link); }
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   padding: 0.95rem 2.25rem;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -382,7 +388,7 @@ a { color: var(--color-link); }
   border: 0;
   border-inline: 1px solid var(--color-border);
   text-align: center;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font);
   font-size: 0.9rem;
   color: var(--color-text-primary);
   -moz-appearance: textfield;
@@ -406,9 +412,9 @@ a { color: var(--color-link); }
 
 .site-footer__meta {
   margin-top: clamp(2.5rem, 5vw, 4rem);
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font);
   font-size: 0.68rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.01em;
   color: var(--color-text-muted);
 }
 
@@ -494,22 +500,22 @@ a { color: var(--color-link); }
 }
 
 .line-item__name {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: var(--font);
   font-weight: 500;
   font-size: 1.1rem;
 }
 
 .line-item__price {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font);
   font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
 
 .line-item__meta {
   margin-top: 0.15rem;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font);
   font-size: 0.68rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
@@ -530,9 +536,9 @@ a { color: var(--color-link); }
   border: 0;
   padding: 0.35rem 0;
   cursor: pointer;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font);
   font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--color-text-muted);
   transition: color 160ms ease;
@@ -553,7 +559,7 @@ a { color: var(--color-link); }
 }
 
 .drawer__total-value {
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: var(--font);
   font-weight: 500;
   font-size: 1.5rem;
 }
@@ -570,9 +576,9 @@ a { color: var(--color-link); }
 
 .drawer__fineprint {
   margin: 0;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font);
   font-size: 0.64rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.01em;
   color: var(--color-text-muted);
 }
 

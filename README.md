@@ -19,10 +19,12 @@ index.html                     the whole page
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
 assets/js/app.js               quantity stepper, order drawer, cart state, reveal
-assets/video/hero.mp4/.webm    the hero reel
-assets/img/hero-poster.jpg     first frame, shown until the reel starts
+assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
+assets/video/intro.mp4/.webm   the intro film — plays once on load
+assets/video/reel-wide.*       the reel of faces, 16:9, for landscape screens
+assets/video/reel-tall.*       the same reel, 9:16, for phones
+assets/img/hero-poster.jpg     first frame, shown until the intro starts
 assets/img/no-01.webp/.jpg     the No. 01 studio photograph
-assets/img/favicon.svg         the wordmark's "lo", cropped square
 ```
 
 ## Deployment
@@ -86,14 +88,14 @@ dark page. To replace it, swap both files (and `PRODUCT.image` in
 - `loom-colors.css` is imported globally, once, ahead of `styles.css`, and is
   kept verbatim. Components reference only the semantic aliases
   (`--color-bg`, `--color-text-primary`, …), never the raw `--loom-*` names.
-- The one exception is the accent moment the brand system names directly: the
-  wordmark (`.loom-gradient-text`). The primary CTA uses `--color-accent`.
-  Accents appear nowhere else — no body text, no routine chrome.
-- The wordmark is always lowercase, never tracked, stretched or italicized.
-  The gradient treatment appears once, at hero scale on the Void, in its own
-  section; the footer uses the flat `--color-text-primary` ink.
-- Space Grotesk 500 for display (sentence case, default letter-spacing), Inter
-  for body and UI, JetBrains Mono for tracked-uppercase labels and metadata.
+- The wordmark is artwork, not type: `assets/brand/vates-wordmark.svg`, a
+  traced outline filled with the six colour bands the logo is built from
+  (#76b856, #f2ba4b, #e3873d, #cf4743, #8b4192, #4698d3). It is always
+  lowercase, never tracked, stretched or italicized, and never recoloured.
+  The primary CTA uses `--color-accent`; accents appear nowhere else.
+- One family for all type, `--font`: Helvetica where it is installed, Inter
+  served as the fallback everywhere else, then Arial. The only tracked
+  treatment left is `.label`, uppercase at 0.18em.
 - Corner radii come from `--radius-sm/md/lg` in `styles.css`; nothing is
   square.
 

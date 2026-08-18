@@ -1,5 +1,5 @@
 /* ============================================================
-   VATES — storefront behaviour
+   vates — storefront behaviour
    Client-side state only. Nothing is persisted, nothing is sent.
    ============================================================ */
 (function () {
