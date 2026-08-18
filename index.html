@@ -137,6 +137,81 @@
 
   <hr class="filament" aria-hidden="true">
 
+  <!-- ── What each picture is quoted as saying ────────────────
+       Only lines that can be traced to a letter, transcript, or dated
+       address; each carries its src. Nothing reads that field — it is
+       there so adding a quote means finding its source first. Frames
+       with no entry run without a quote. -->
+  <script type="application/json" id="reel-captions">
+{
+  "08": [
+    { "q": "I like the dreams of the future better than the history of the past.",
+      "who": "Thomas Jefferson",
+      "src": "Letter to John Adams, 1 August 1816" }
+  ],
+  "09": [
+    { "q": "Life can only be understood backwards; but it must be lived forwards.",
+      "who": "S\u00f8ren Kierkegaard",
+      "src": "Journals IV A 164, 1843" }
+  ],
+  "10": [
+    { "q": "A journey of a thousand miles begins with a single step.",
+      "who": "Laozi",
+      "src": "Tao Te Ching, ch. 64" }
+  ],
+  "12": [
+    { "q": "Old soldiers never die; they just fade away.",
+      "who": "Douglas MacArthur",
+      "src": "Address to Congress, 19 April 1951, quoting the barracks ballad" }
+  ],
+  "13": [
+    { "q": "Music is the pleasure the human mind experiences from counting without being aware that it is counting.",
+      "who": "Gottfried Wilhelm Leibniz",
+      "src": "Letter to Christian Goldbach, 17 April 1712" }
+  ],
+  "15": [
+    { "q": "Veni, vidi, vici.",
+      "who": "Julius Caesar",
+      "src": "Reported by Plutarch and Suetonius, after Zela, 47 BC" }
+  ],
+  "20": [
+    { "q": "He who has a why to live for can bear almost any how.",
+      "who": "Friedrich Nietzsche",
+      "src": "Twilight of the Idols, Maxims and Arrows 12, 1888" }
+  ],
+  "22": [
+    { "q": "Magnificent desolation.",
+      "who": "Buzz Aldrin",
+      "src": "Apollo 11 air-to-ground transcript, 20 July 1969" }
+  ],
+  "23": [
+    { "q": "If I win, I am an American, not a black American. But if I did something bad, they would call me a negro.",
+      "who": "Tommie Smith",
+      "src": "Press conference, Mexico City, 17 October 1968" }
+  ],
+  "27": [
+    { "q": "Associate with men of good quality if you esteem your own reputation; for it is better to be alone than in bad company.",
+      "who": "George Washington",
+      "src": "Rules of Civility & Decent Behaviour, no. 56, copied in his own hand" }
+  ],
+  "30": [
+    { "q": "Stay hungry. Stay foolish.",
+      "who": "Steve Jobs",
+      "src": "Stanford commencement address, 12 June 2005, quoting the Whole Earth Catalog" }
+  ],
+  "31": [
+    { "q": "If I have seen further it is by standing on the shoulders of giants.",
+      "who": "Isaac Newton",
+      "src": "Letter to Robert Hooke, 5 February 1675" }
+  ],
+  "32": [
+    { "q": "Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world.",
+      "who": "Albert Einstein",
+      "src": "Interview with George Sylvester Viereck, Saturday Evening Post, 26 October 1929" }
+  ]
+}
+</script>
+
   <!-- ── Who we are: the film, then the creators ──────────────
        The film plays on a tap. When it ends, app.js hands the same
        frame to the archive reel — data-frame-src is the path with
@@ -167,6 +242,10 @@
               <img alt="" decoding="async">
             </div>
           </div>
+          <figure class="about__quotebox" id="about-quote" aria-hidden="true" hidden>
+            <blockquote class="about__quote"></blockquote>
+            <figcaption class="about__quote-by"></figcaption>
+          </figure>
           <p class="about__caption">The film — 24 seconds, plays on your tap.
             The creators follow it.</p>
         </div>

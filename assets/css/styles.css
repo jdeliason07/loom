@@ -363,6 +363,31 @@ a { color: var(--ink-2); }
   transition: opacity 600ms ease;
 }
 .about__reel img.is-current { opacity: 1; }
+/* The sourced quote under whichever creator the reel is showing.
+   Reserved height, so the frame does not jump as lines come and go;
+   frames with no sourced line show nothing. */
+.about__quotebox {
+  margin: 0.9rem auto 0;
+  max-width: 42ch;
+  min-height: 4.6em;
+  text-align: center;
+}
+.about__quote {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.about__quote::before { content: "\201C"; }
+.about__quote::after { content: "\201D"; }
+.about__quote-by {
+  margin-top: 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
 .about__caption { margin-top: 0.7rem; text-align: center; font-size: 0.74rem; color: var(--ink-3); }
 
 /* ── The bottle ─────────────────────────────────────────────── */

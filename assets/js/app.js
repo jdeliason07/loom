@@ -490,6 +490,31 @@
     var warmed = 0;
     var HOLD = 2600;
 
+    /* The sourced quotes, keyed by the frame's two-digit number. A frame
+       with a list takes the next entry each time it comes round; a frame
+       with no entry runs without a quote. A missing or malformed block
+       is caught: the reel runs, it just runs quietly. */
+    var quotes = (function () {
+      try {
+        return JSON.parse(document.getElementById("reel-captions").textContent) || {};
+      } catch (e) { return {}; }
+    })();
+    var quoteTurns = {};
+    var quoteBox = document.getElementById("about-quote");
+
+    var say = function (frameIndex) {
+      if (!quoteBox) return;
+      var key = (frameIndex < 9 ? "0" : "") + (frameIndex + 1);
+      var list = quotes[key];
+      if (!list || !list.length) { quoteBox.hidden = true; return; }
+      var at = quoteTurns[key] || 0;
+      quoteTurns[key] = (at + 1) % list.length;
+      var entry = list[at];
+      quoteBox.querySelector(".about__quote").textContent = entry.q || "";
+      quoteBox.querySelector(".about__quote-by").textContent = entry.who || "";
+      quoteBox.hidden = false;
+    };
+
     /* Pull the first pictures into cache while the film plays, so the
        handover lands on a decoded frame rather than a fetch. */
     var warmNext = function () {
@@ -509,6 +534,7 @@
         slot.classList.add("is-current");
         slots[1 - idle].classList.remove("is-current");
         idle = 1 - idle;
+        say(cursor);
         warmNext();
         hold();
       };
@@ -528,6 +554,7 @@
       window.clearTimeout(timer);
       slots[0].classList.remove("is-current");
       slots[1].classList.remove("is-current");
+      if (quoteBox) quoteBox.hidden = true;
       /* a head start for the handover */
       warmNext(); warmNext(); warmNext();
     });
