@@ -23,7 +23,7 @@ assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the 
 assets/video/intro.mp4/.webm   the intro film — plays once on load
 assets/img/reel/01–32.webp     the reel of stills the film hands over to
 assets/img/hero-poster.jpg     first frame, shown until the intro starts
-assets/img/no-01.webp/.jpg     the No. 01 photograph — the pair, clear and smoke
+assets/img/no-01.webp/.jpg     the No. 01 photograph — the pair, on a desk in use
 ```
 
 ## Deployment
