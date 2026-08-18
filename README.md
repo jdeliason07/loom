@@ -1,6 +1,6 @@
 # VATES
 
-Single-product storefront for **No. 01** — a one-piece borosilicate glass bottle, $99.
+Single-product storefront for **No. 01** — a one-piece borosilicate glass bottle, $49.
 
 Static site: plain HTML, CSS and JS. No framework, no build step, no dependencies.
 
@@ -211,7 +211,7 @@ in `track.js` and callers say "view", "checkout", "purchase".
 
 `thanks.html` reports the list price of one bottle. There is no server here to
 ask Stripe what was actually charged, so a two-bottle order is still reported as
-$99 — under-reporting, which is the safe direction, and the true figures are in
+$49 — under-reporting, which is the safe direction, and the true figures are in
 Stripe. A webhook into the Conversions API is the fix when the ad spend
 justifies it.
 

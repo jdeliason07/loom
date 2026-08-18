@@ -52,7 +52,7 @@ window.VATES = {
     id: "no-01",
     sku: "VATES-NO01",
     name: "No. 01",
-    price: 99,
+    price: 49,
     currency: "USD"
   }
 };

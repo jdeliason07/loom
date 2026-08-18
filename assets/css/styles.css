@@ -602,6 +602,16 @@ a { color: var(--color-link); }
   color: var(--color-text-muted);
 }
 
+/* The main page's footer is built around a full-width wordmark and is
+   padded to match. The plain pages put two short lines in the same
+   element, where that padding — plus the meta's own top margin, plus
+   the main column's bottom padding — stacked up into several hundred
+   pixels of empty ground below the last thing on the page. They get a
+   footer sized for what they actually put in it. */
+.page .site-footer { padding-block: clamp(1.75rem, 4vw, 2.5rem); }
+.page .site-footer__meta { margin-top: 0; }
+.page .page__main { padding-bottom: clamp(2.5rem, 6vw, 4rem); }
+
 .site-footer__links {
   margin-top: 0.75rem;
   display: flex;
@@ -650,7 +660,10 @@ a { color: var(--color-link); }
   inset: 0 0 0 auto;
   z-index: 100;
   width: min(27rem, 100%);
-  background: var(--color-bg-elevated);
+  /* The page ground, not the elevated grey. The drawer covers most of a
+     phone screen, and a cool panel over a warm page read as a different
+     site sliding in over this one. */
+  background: var(--color-bg);
   border-left: 1px solid var(--color-border);
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
   display: flex;
@@ -690,23 +703,81 @@ a { color: var(--color-link); }
 
 .drawer__empty { color: var(--color-text-muted); font-size: 0.95rem; }
 
+/* ── What's in the box ───────────────────────────────────────
+   Sits in the space the cart leaves below a single line item —
+   dead space on a phone, where the drawer is nearly the whole
+   screen — and answers the last question before checkout. ---- */
+.box {
+  margin-top: clamp(1.75rem, 5vw, 2.5rem);
+  padding-top: clamp(1.5rem, 4vw, 2rem);
+  border-top: 1px solid var(--color-border);
+}
+
+.box__title { display: block; color: var(--color-text-muted); }
+
+.box__list {
+  margin-top: 1.1rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.box__list li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+/* A rule rather than a bullet: the page has no bulleted lists anywhere
+   else and a dot would be the only one. */
+.box__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.66em;
+  width: 0.7rem;
+  height: 1px;
+  background: var(--color-text-muted);
+}
+
 .line-item {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
+  /* Narrow, because the thumbnail is one tall bottle rather than the
+     wide desk scene the product section uses. */
+  grid-template-columns: 3rem minmax(0, 1fr);
   gap: 1.25rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--color-border);
 }
 
+/* The last item's rule and the box list's rule would otherwise sit a
+   few centimetres apart and read as a mistake. The box supplies the
+   divider; the line above it steps aside. */
+.line-item:last-child { border-bottom: 0; }
+
 .line-item__thumb {
-  background: var(--color-bg);
+  /* Lifted off the drawer rather than matching it, now that the drawer
+     is the ground colour itself. */
+  background: color-mix(in srgb, var(--color-bg) 90%, var(--color-text-primary));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.5rem;
+  /* Proportioned to the bottle so the frame hugs it instead of leaving
+     it adrift in the middle of a square. */
+  aspect-ratio: 1 / 2;
+  padding: 0.4rem;
   display: grid;
   place-items: center;
+  overflow: hidden;
 }
-.line-item__thumb img { max-height: 5rem; width: auto; }
+.line-item__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
 
 .line-item__head {
   display: flex;

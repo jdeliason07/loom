@@ -9,8 +9,10 @@
     id: "no-01",
     name: "No. 01",
     meta: "Borosilicate · 1 L",
-    price: 99,
-    image: "assets/img/no-01.webp",
+    price: 49,
+    /* The drawer shows the bottle on its own, not the desk scene the
+       product section uses — at 4.5rem a whole room is a smudge. */
+    image: "assets/img/no-01-thumb.webp",
     max: 10
   };
 
@@ -27,6 +29,7 @@
     close: document.getElementById("drawer-close"),
     items: document.getElementById("line-items"),
     empty: document.getElementById("drawer-empty"),
+    box: document.getElementById("box-contents"),
     total: document.getElementById("drawer-total"),
     checkout: document.getElementById("checkout"),
     notice: document.getElementById("drawer-notice")
@@ -137,6 +140,10 @@
     cart.forEach(function (line) { el.items.appendChild(lineItemNode(line)); });
 
     el.empty.hidden = cart.length > 0;
+    /* The box list is the mirror of the empty state: it describes what
+       is being bought, so it belongs only when there is something in
+       the cart. */
+    if (el.box) el.box.hidden = cart.length === 0;
     el.total.textContent = money(totalPrice());
     el.checkout.disabled = cart.length === 0;
 
