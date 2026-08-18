@@ -350,9 +350,16 @@
     var handOver = function () {
       if (handedOver) return;
 
+      /* Two cuts of the same reel: a wide one framed for a landscape
+         screen, and a tall one for a phone, where the pictures sit whole
+         over a blurred copy of themselves rather than being cropped to a
+         shape they were never shot in. Chosen once, here, off the same
+         breakpoint the stylesheet uses. */
+      var wide = window.matchMedia && window.matchMedia("(min-width: 900px)").matches;
+      var key = wide ? "wide" : "tall";
       var formats = [
-        [reel.getAttribute("data-loop-mp4"), "video/mp4"],
-        [reel.getAttribute("data-loop-webm"), "video/webm"]
+        [reel.getAttribute("data-loop-" + key + "-mp4"), "video/mp4"],
+        [reel.getAttribute("data-loop-" + key + "-webm"), "video/webm"]
       ].filter(function (pair) { return !!pair[0]; });
       if (!formats.length) return;
 

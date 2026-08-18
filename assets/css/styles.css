@@ -220,17 +220,15 @@ a { color: var(--color-link); }
   }
 }
 
-/* The reel is cut to 16:9 and every still fills its frame, so on a wide
-   screen it covers with almost nothing lost — that is the state the hero
-   comes to rest in, and it fills the screen. Not on phones: covering a
-   16:9 reel on a portrait screen would throw 74% of the width away, so
-   there it stays contained, whole and unzoomed. */
-@media (min-width: 900px) {
-  .backdrop.is-reel .backdrop__video {
-    height: 100%;
-    max-height: none;
-    object-fit: cover;
-  }
+/* The reel fills the screen at every width, because it ships in two cuts
+   and app.js loads the one that matches: 16:9 for a landscape screen,
+   9:16 for a phone. The tall cut insets each picture over a blurred copy
+   of itself, so what a phone's cover-crop takes off the sides is blur
+   rather than photograph. */
+.backdrop.is-reel .backdrop__video {
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
 }
 
 .backdrop.is-background .backdrop__video { filter: blur(18px) saturate(0.8) brightness(0.92); }
