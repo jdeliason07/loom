@@ -246,9 +246,31 @@
     }
   }
 
+  /* Stripe forwards any utm_* it is given on the payment link URL to the
+     redirect URL after payment. client_reference_id does NOT come back
+     that way, so these are what let thanks.html know which campaign it
+     is reporting a conversion for. */
+  function campaign() {
+    var touch = attribution.first || attribution.last;
+    var p = (touch && touch.params) || {};
+    var out = {};
+    ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].forEach(function (k) {
+      if (p[k]) out[k] = p[k];
+    });
+    /* A creator link carries no utm_source of its own, so it is given
+       one — otherwise the sale comes back from Stripe unattributed. */
+    var creator = p.ref || p.creator || p.via || p.aff;
+    if (creator && !out.utm_source) {
+      out.utm_source = clean(creator);
+      out.utm_medium = out.utm_medium || "creator";
+    }
+    return out;
+  }
+
   window.VATES_TRACK = {
     track: track,
     reference: reference,
+    campaign: campaign,
     attribution: attribution,
     /* Exposed so the tagging on a link can be checked from the console
        on the live site: VATES_TRACK.reference() */

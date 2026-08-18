@@ -250,9 +250,22 @@
     try {
       ref = (window.VATES_TRACK && window.VATES_TRACK.reference()) || "";
     } catch (e) {}
-    if (!ref) return link;
-    return link + (link.indexOf("?") < 0 ? "?" : "&") +
-      "client_reference_id=" + encodeURIComponent(ref);
+    var parts = [];
+    if (ref) parts.push("client_reference_id=" + encodeURIComponent(ref));
+
+    /* Stripe carries utm_* through to the redirect URL after payment,
+       which client_reference_id does not do — so these are how
+       thanks.html knows which campaign the sale belongs to when it
+       reports the conversion. */
+    try {
+      var camp = (window.VATES_TRACK && window.VATES_TRACK.campaign()) || {};
+      Object.keys(camp).forEach(function (k) {
+        parts.push(encodeURIComponent(k) + "=" + encodeURIComponent(camp[k]));
+      });
+    } catch (e) {}
+
+    if (!parts.length) return link;
+    return link + (link.indexOf("?") < 0 ? "?" : "&") + parts.join("&");
   }
 
   function goToCheckout() {
