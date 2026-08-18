@@ -340,6 +340,46 @@
       if (!document.hidden) start();
     });
 
+    /* The intro film plays once, then the reel of faces takes over and
+       loops for the rest of the visit. The markup stays the only place
+       that names a file; the handover reads them off the element. It runs
+       once, and an intro that fails to load hands over rather than
+       leaving the hero on a dead poster. */
+    var handedOver = false;
+
+    var handOver = function () {
+      if (handedOver) return;
+
+      var formats = [
+        [reel.getAttribute("data-loop-mp4"), "video/mp4"],
+        [reel.getAttribute("data-loop-webm"), "video/webm"]
+      ].filter(function (pair) { return !!pair[0]; });
+      if (!formats.length) return;
+
+      handedOver = true;
+      reel.loop = true;            // the reel is where the hero comes to rest
+      reel.removeAttribute("poster");
+
+      /* Swap the <source> list rather than assigning src: src would win
+         over the children and throw the fallback away, leaving anything
+         that cannot decode H.264 on a dead frame. This way the browser
+         goes on picking the format it can actually play. */
+      while (reel.firstChild) reel.removeChild(reel.firstChild);
+      formats.forEach(function (pair) {
+        var node = document.createElement("source");
+        node.setAttribute("src", pair[0]);
+        node.setAttribute("type", pair[1]);
+        reel.appendChild(node);
+      });
+
+      reel.load();
+      measure();                   // the reel is not the shape the intro was
+      start();
+    };
+
+    reel.addEventListener("ended", handOver);
+    reel.addEventListener("error", handOver);
+
     var apply = function () {
       queued = false;
 
