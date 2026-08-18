@@ -24,7 +24,7 @@ assets/video/intro.mp4/.webm   the intro film — plays once on load
 assets/video/reel-wide.*       the reel of faces, 16:9, for landscape screens
 assets/video/reel-tall.*       the same reel, 9:16, for phones
 assets/img/hero-poster.jpg     first frame, shown until the intro starts
-assets/img/no-01.webp/.jpg     the No. 01 studio photograph
+assets/img/no-01.webp/.jpg     the No. 01 photograph — the pair, clear and smoke
 ```
 
 ## Deployment
@@ -79,9 +79,13 @@ and you can delete that block to go full-bleed everywhere.
 `assets/img/hero-poster.jpg` (see the ffmpeg lines above). No markup changes.
 
 **Product photo** — `no-01.webp` with a `no-01.jpg` fallback, served full-bleed
-from `.product__stage`; its own light studio ground becomes a plate against the
-dark page. To replace it, swap both files (and `PRODUCT.image` in
-`assets/js/app.js`, which the drawer thumbnail uses).
+from `.product__stage`; the photograph's own ground becomes a plate against the
+dark page. To replace it, swap both files, update the `width`/`height`
+attributes on the `<img>` in `index.html` to the new pixel dimensions, and check
+`PRODUCT.image` in `assets/js/app.js`, which the drawer thumbnail uses. The
+stage is width-driven — the photo fills it and sets its own height — so any
+aspect ratio fits without markup changes; a much taller frame may want a smaller
+cap than the 560px on `.product__stage` and its grid track.
 
 ## Brand rules encoded here
 
