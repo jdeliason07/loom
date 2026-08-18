@@ -121,7 +121,113 @@
   </div>
   <div class="backdrop__scrim"></div>
   <div class="backdrop__wash"></div>
+
+  <!-- The quote under the picture. Two slots again, so one line can clear
+       before the next arrives rather than the two crossing over each
+       other; app.js writes into whichever is not showing. -->
+  <div class="reel__caption" id="reel-caption">
+    <figure class="reel__caption-line">
+      <blockquote class="reel__quote"></blockquote>
+      <figcaption class="reel__said"></figcaption>
+    </figure>
+    <figure class="reel__caption-line">
+      <blockquote class="reel__quote"></blockquote>
+      <figcaption class="reel__said"></figcaption>
+    </figure>
+  </div>
 </div>
+
+<!-- ── What each picture is quoted as saying ────────────────────────
+     Declared here for the same reason the pictures are: editing a quote,
+     or moving one from one frame to another, is a change to the markup
+     and not to app.js. Keyed by the frame's two-digit number, so the key
+     is the filename — 07 is assets/img/reel/07.webp.
+
+     The value is a list, not a single quote, because some frames hold
+     more than one person: The School of Athens is Plato and Aristotle,
+     the podium in Mexico City is three men, Iwo Jima is six. A frame
+     with a list takes the next one each time it comes round, so the
+     reel credits a different man on each loop rather than picking one
+     and dropping the rest. Frames with no entry — the Declaration,
+     Earthrise, the wall coming down — carry no quote and show none. -->
+<script type="application/json" id="reel-captions">
+{
+  "04": [
+    { "q": "Wise men speak because they have something to say; fools because they have to say something.", "who": "Plato" },
+    { "q": "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", "who": "Aristotle" }
+  ],
+  "05": [
+    { "q": "You have power over your mind \u2014 not outside events. Realize this, and you will find strength.", "who": "Marcus Aurelius" }
+  ],
+  "06": [
+    { "q": "A nation which can compress its words into the smallest number of sentences ensures the most enduring strength.", "who": "Alexander Hamilton" }
+  ],
+  "07": [
+    { "q": "An investment in knowledge pays the best interest.", "who": "Benjamin Franklin" }
+  ],
+  "08": [
+    { "q": "I like the dreams of the future better than the history of the past.", "who": "Thomas Jefferson" }
+  ],
+  "09": [
+    { "q": "Life can only be understood backwards; but it must be lived forwards.", "who": "S\u00f8ren Kierkegaard" }
+  ],
+  "10": [
+    { "q": "A journey of a thousand miles begins with a single step.", "who": "Laozi" }
+  ],
+  "11": [
+    { "q": "God must have loved the common man, because he made so many of them.", "who": "Chester W. Nimitz" }
+  ],
+  "12": [
+    { "q": "Old soldiers never die; they just fade away.", "who": "Douglas MacArthur" }
+  ],
+  "13": [
+    { "q": "Music is the pleasure the human mind experiences from counting without being aware that it is counting.", "who": "Gottfried Wilhelm Leibniz" }
+  ],
+  "14": [
+    { "q": "And yet it moves.", "who": "Galileo Galilei" }
+  ],
+  "15": [
+    { "q": "Veni, vidi, vici.", "who": "Julius Caesar" }
+  ],
+  "16": [
+    { "q": "There are no impossible things for him who will try.", "who": "Alexander the Great" }
+  ],
+  "20": [
+    { "q": "He who has a why to live for can bear almost any how.", "who": "Friedrich Nietzsche" }
+  ],
+  "22": [
+    { "q": "Magnificent desolation.", "who": "Buzz Aldrin" }
+  ],
+  "23": [
+    { "q": "If I win, I am an American, not a black American. But if I did something bad, they would call me a negro.", "who": "Tommie Smith" },
+    { "q": "We were concerned about the lack of human rights in America.", "who": "John Carlos" },
+    { "q": "I'll stand with you.", "who": "Peter Norman" }
+  ],
+  "24": [
+    { "q": "Follow me.", "who": "Michael Strank" },
+    { "q": "Tell 'em I'm alright.", "who": "Harlon Block" },
+    { "q": "Let's pray that we may never have another war.", "who": "Ira Hayes" },
+    { "q": "Remember me always.", "who": "Franklin Sousley" },
+    { "q": "I'm no hero.", "who": "Harold Schultz" },
+    { "q": "We did what we were told.", "who": "Harold Keller" }
+  ],
+  "26": [
+    { "q": "Impossible is a word to be found only in the dictionary of fools.", "who": "Napoleon Bonaparte" }
+  ],
+  "27": [
+    { "q": "Associate with men of good quality if you esteem your own reputation; for it is better to be alone than in bad company.", "who": "George Washington" }
+  ],
+  "30": [
+    { "q": "Stay hungry. Stay foolish.", "who": "Steve Jobs" }
+  ],
+  "31": [
+    { "q": "If I have seen further it is by standing on the shoulders of giants.", "who": "Isaac Newton" }
+  ],
+  "32": [
+    { "q": "Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world.", "who": "Albert Einstein" }
+  ]
+}
+</script>
 
 <main id="main">
 

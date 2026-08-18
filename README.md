@@ -109,24 +109,24 @@ Every later load in that tab opens straight on the reel; a genuinely new visit
 still gets the film.
 
 On its `ended` event app.js hands over to the **reel**: 32
-stills cut half a second apart, looping for the rest of the visit — the whole
-reel comes round in about sixteen seconds.
+stills cut a second and a half apart, looping for the rest of the visit — the
+whole reel comes round in about forty-eight seconds.
 There is no `loop` attribute on the video on purpose — without `ended` there is
 no handover — and a film that fails to load fires `error`, which hands over too
 rather than leaving the hero on a dead poster.
 
 The reel is two `<img>` slots taking turns (`.reel__frame`). The next picture is
 loaded and decoded into the idle slot before it is faded up, so a frame is never
-seen half-drawn. At two pictures a second there is no room to fetch one between
-cuts, so the whole reel is pulled into cache when the page loads and the film
-plays over the top of it, buying the time. A picture that will not load is
+seen half-drawn. There is not much room to fetch one between cuts, so the whole
+reel is pulled into cache when the page loads and the film plays over the top of
+it, buying the time. A picture that will not load is
 dropped from the reel rather than left as a gap in it; if none of them load,
 `.is-reel` is never set and the hero simply holds the last frame of the film.
 
 The cut itself is not a symmetrical crossfade. The outgoing picture is held at
 full opacity underneath and dropped in place only once the incoming one has
 covered it — fading both at once dips to the background between every pair,
-which a slow dissolve carries and half-second cuts read as a flicker.
+which a slow dissolve carries and a fast cut reads as a flicker.
 
 The pictures run from a tall scroll to a wide panorama, so cropping them all to
 the shape of the screen would cut the subject out of half of them. Each is shown
@@ -139,16 +139,46 @@ Scrolling zooms the reel out to full bleed, dims and blurs it back, and — once
 settled — stops it on one still picture behind the site. Scroll back up and it
 picks up where it left off. A backgrounded tab holds its picture too.
 
+## The quotes
+
+Most of the reel is a person, and under each of them is something they said.
+The quotes are declared in `index.html`, in the `#reel-captions` JSON block, for
+the same reason the pictures are named there: changing a quote, or moving one
+from one frame to another, is an edit to the markup and not to `app.js`. The key
+is the frame's two-digit number, so it is the filename — `07` is
+`assets/img/reel/07.webp`.
+
+The value is a *list*, because several frames hold more than one person: The
+School of Athens is Plato and Aristotle, the podium in Mexico City is three men,
+Iwo Jima is six. A frame with a list takes the next entry each time it comes
+round, so one loop of the reel credits Plato and the next credits Aristotle —
+better than picking one and dropping the rest. Ten frames have no entry at all
+(the Declaration, Earthrise, the wall coming down, the Nike memo) and show no
+quote; the wash goes with it, so there is no shadow across the bottom of a
+picture with nothing to read on it.
+
+The quote and the picture turn together — `say()` is called from the same
+`then()` that swaps the slots, so a line is never left under the wrong face. The
+two caption slots hand over differently from the pictures: a picture covers the
+one it replaces and text does not, so the outgoing line is cleared first (200ms)
+and the incoming one held back until it has gone (460ms after a 200ms delay).
+Both fit inside the 1500ms a picture holds.
+
+The reel's backdrop is `aria-hidden`, and the quotes are inside it. That is
+deliberate: a line replaced every second and a half is decoration, and
+announcing each one would make the page unusable with a screen reader.
+
 ## Replacing the imagery
 
 **Reel** — drop numbered files at `assets/img/reel/01.webp` … `32.webp`. The
 count and the path are declared in `index.html` on `#reel` (`data-frame-count`
 and `data-frame-src`, where `{n}` stands in for the two-digit number), so
 changing how many pictures the reel holds is a one-attribute edit, not a code
-change. `FRAME_MS` in `app.js` is how long each one holds — 500ms, or 4s under
-`prefers-reduced-motion`, where the cuts would otherwise be the motion — and
-`--reel-fade` on `.reel` is the dissolve between them, which wants to stay well
-inside `FRAME_MS`.
+change. Add the new frame's quote to `#reel-captions` under the same number, or
+leave it out and the frame runs without one. `FRAME_MS` in `app.js` is how long
+each one holds — 1500ms, or 4s under `prefers-reduced-motion`, where the cuts
+would otherwise be the motion — and `--reel-fade` on `.reel` is the dissolve
+between them, which wants to stay well inside `FRAME_MS`.
 
 **Film** — replace `assets/video/intro.mp4` / `.webm` and `hero-poster.jpg`:
 

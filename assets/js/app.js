@@ -429,11 +429,13 @@
     var settled = false;
     var timer = null;
 
-    /* Half a second a picture: fast cutting, not a slideshow. The
-       dissolve between them is --reel-fade in the stylesheet and has to
-       stay well inside this. Reduced motion gets a slow reel instead —
-       at this cadence the cuts are the motion. */
-    var FRAME_MS = reduceMotion.matches ? 4000 : 500;
+    /* A second and a half a picture. It was half a second, which was the
+       right cadence for pictures alone and is the wrong one now there is
+       a line to read under them: a quote of any length cannot be taken
+       in twice a second. The dissolve between cuts is --reel-fade in the
+       stylesheet and the caption's own handover is timed off it; both
+       have to stay well inside this. Reduced motion gets a slow reel. */
+    var FRAME_MS = reduceMotion.matches ? 4000 : 1500;
     var OVERSCAN = 1.06;   // keeps the background blur off the viewport edge
 
     /* The film is laid out contained — a panel on wide screens, the
@@ -487,14 +489,38 @@
     /* ── The reel of stills ──────────────────────────────────────
        The pictures are named in the markup, not here: data-frame-src
        is the path with {n} standing in for a two-digit number,
-       counted from 01 up to data-frame-count. ------------------- */
+       counted from 01 up to data-frame-count. The quotes are named
+       there too, in #reel-captions, keyed by that same number. ---- */
+
+    /* A missing, empty or malformed block is not worth failing the reel
+       over: the pictures still run, they just run without quotes. */
+    var quotes = (function () {
+      var node = document.getElementById("reel-captions");
+      if (!node) return {};
+      try {
+        var parsed = JSON.parse(node.textContent);
+        return (parsed && typeof parsed === "object") ? parsed : {};
+      } catch (e) { return {}; }
+    })();
+
+    /* Each frame carries its own quotes rather than the two being held
+       in step by index: turn() drops a picture that will not load out of
+       `frames` entirely, and a parallel list would be left one out of
+       line with the reel from there on. `said` is how many times this
+       frame has come round, which is what picks the quote on a frame
+       that holds more than one person. */
     var frames = (function () {
       var list = [];
       var template = reelEl.getAttribute("data-frame-src");
       var count = parseInt(reelEl.getAttribute("data-frame-count"), 10);
       if (!template || !(count > 0)) return list;
       for (var i = 1; i <= count; i++) {
-        list.push(template.replace("{n}", (i < 10 ? "0" : "") + i));
+        var n = (i < 10 ? "0" : "") + i;
+        list.push({
+          src: template.replace("{n}", n),
+          lines: Array.isArray(quotes[n]) ? quotes[n] : [],
+          said: 0
+        });
       }
       return list;
     })();
@@ -503,6 +529,48 @@
     var idle = 1;      // the slot the next picture is decoded into
     var cursor = -1;   // how far through `frames` the reel has got
     var warmed = 0;    // how many have been pulled into cache so far
+
+    var caption = document.getElementById("reel-caption");
+    var lines = document.querySelectorAll(".reel__caption-line");
+    var idleLine = 1;  // the slot the next quote is written into
+
+    /* The quote under the picture. Two slots for the same reason the
+       pictures have two — the one being written into is the one that is
+       not showing — but they hand over differently: a picture covers the
+       one it replaces, and text does not, so two quotes fading through
+       each other in the same place would be unreadable. The stylesheet
+       clears the outgoing one first and holds the incoming one back
+       until it has gone.
+
+       A frame that holds several people takes the next of them each time
+       it comes round, so a loop of the reel credits Plato and the next
+       credits Aristotle. A frame with nothing to say clears the line. */
+    var say = function (frame) {
+      if (lines.length < 2) return;
+
+      /* Nothing to say: the words go, and so does the wash behind them.
+         It is there to be read against, and on the Declaration or the
+         Nike memo — pages of type, and no one to quote — it would be a
+         shadow across the bottom of the picture for no reason. */
+      if (!frame.lines.length) {
+        if (caption) caption.classList.add("is-quiet");
+        lines[0].classList.remove("is-current");
+        lines[1].classList.remove("is-current");
+        return;
+      }
+
+      if (caption) caption.classList.remove("is-quiet");
+
+      var line = frame.lines[frame.said % frame.lines.length];
+      frame.said += 1;
+
+      var slot = lines[idleLine];
+      slot.querySelector(".reel__quote").textContent = line.q || "";
+      slot.querySelector(".reel__said").textContent = line.who || "";
+      lines[1 - idleLine].classList.remove("is-current");
+      slot.classList.add("is-current");
+      idleLine = 1 - idleLine;
+    };
 
     /* Settled once the picture is loaded and decoded, so it is never
        faded up half-drawn. decode() only smooths the paint; load and
@@ -539,9 +607,9 @@
         /^(slow-)?2g$/.test(link.effectiveType || "") ||
         link.effectiveType === "3g";
       var take = thrifty ? Math.min(6, frames.length) : frames.length;
-      frames.slice(0, take).forEach(function (src) {
+      frames.slice(0, take).forEach(function (frame) {
         var img = new Image();
-        img.src = src;
+        img.src = frame.src;
       });
       warmed = take;
     };
@@ -552,7 +620,7 @@
     var warmNext = function () {
       if (warmed >= frames.length) return;
       var img = new Image();
-      img.src = frames[warmed];
+      img.src = frames[warmed].src;
       warmed += 1;
     };
 
@@ -575,8 +643,8 @@
       var pic = slot.querySelector(".reel__pic");
       var blur = slot.querySelector(".reel__blur");
 
-      pic.src = frames[index];
-      blur.src = frames[index];   // the same file, so it costs one request
+      pic.src = frames[index].src;
+      blur.src = frames[index].src;   // the same file, so it costs one request
 
       ready(pic).then(function () {
         slots[idle].classList.add("is-current");
@@ -586,6 +654,7 @@
            if none of them load, the hero holds the last frame of the film
            rather than cutting to black. */
         backdrop.classList.add("is-reel");
+        say(frames[index]);   // the quote turns with the picture, not before it
         warmNext();
         hold();
       })["catch"](function () {

@@ -325,7 +325,7 @@ a { color: var(--color-link); }
 .reel {
   position: absolute;
   inset: 0;
-  --reel-fade: 140ms;   /* the dissolve between cuts; see FRAME_MS in app.js */
+  --reel-fade: 400ms;   /* the dissolve between cuts; see FRAME_MS in app.js */
   transform: scale(calc(1 + (var(--bg-cover) - 1) * var(--bg-p)));
   transform-origin: 50% 50%;
   opacity: calc(1 - 0.68 * var(--bg-p));
@@ -407,6 +407,130 @@ a { color: var(--color-link); }
   background: linear-gradient(to bottom,
     color-mix(in srgb, var(--color-bg) 48%, transparent) 0%,
     color-mix(in srgb, var(--color-bg) 64%, transparent) 100%);
+}
+
+/* ── The quote under the picture ─────────────────────────────
+   Sits over the reel rather than inside it, so it is not scaled,
+   blurred or dimmed along with the picture behind it. Above the
+   cue, clear of it — and gone by the time the reel has become the
+   page ground, where the site's own words are.
+   ------------------------------------------------------------ */
+.reel__caption {
+  /* How far the words are lifted off the floor of the screen. Named,
+     because the wash behind them is anchored to that floor and has to
+     subtract it again. */
+  --caption-lift: clamp(7rem, 16vh, 11rem);
+
+  position: absolute;
+  left: 50%;
+  bottom: var(--caption-lift);
+  translate: -50% 0;
+  width: min(46rem, 88vw);
+  /* Room for the longest quote at two lines. Fixed rather than shrunk to
+     the text so the wash behind it does not breathe in and out as one
+     quote gives way to the next. */
+  min-height: 8.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: center;
+  /* Nothing to show until the film has handed over; .is-reel is set on
+     the first picture that actually lands. */
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.backdrop.is-reel .reel__caption { opacity: 1; }
+
+/* A picture with no one to quote carries no wash either; app.js sets
+   this from the frame's own entry, or the absence of one. */
+.backdrop.is-reel .reel__caption.is-quiet { opacity: 0; }
+
+/* Once the reel is the background the quote is in the way of the page,
+   so it goes — faster than it arrived, and before the blur reaches it.
+   Same specificity as the rule above, so this has to stay below it. */
+.backdrop.is-background .reel__caption {
+  opacity: 0;
+  transition-duration: 260ms;
+}
+
+/* The ground the words are read against. The reel runs from a lantern-lit
+   oil painting to a white sheet of typing paper, so the text cannot rely
+   on the picture being dark.
+
+   This was a pool of the page's brown sitting behind the words, and on a
+   pale frame — Iwo Jima's sky, the marble of the Caesar — it read as a
+   smudge on the picture with an edge you could find. It runs the width
+   of the screen and off the bottom of it instead: the picture darkening
+   towards its floor, which is what the scrim above is already doing at
+   the hero, carried far enough up to reach the words. Nothing here has a
+   side, so there is no shape to see. */
+.reel__caption::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(-1 * var(--caption-lift));   /* down to the floor of the screen */
+  translate: -50% 0;
+  width: 200vw;
+  height: min(40rem, 62vh);
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--color-bg) 74%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg) 60%, transparent) 30%,
+    color-mix(in srgb, var(--color-bg) 30%, transparent) 62%,
+    color-mix(in srgb, var(--color-bg) 8%, transparent) 84%,
+    transparent 100%);
+}
+
+/* Both slots hang off the bottom edge, so the name stays put and a
+   longer quote grows upwards into the picture rather than pushing the
+   line down the screen. */
+.reel__caption-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  opacity: 0;
+  /* Going out: quickly, and immediately. */
+  transition: opacity 200ms ease;
+}
+
+.reel__caption-line.is-current {
+  opacity: 1;
+  /* Coming in: only once the one before it has cleared, so the two are
+     never on the screen together. 200 + 460 is still well inside the
+     1500ms a picture holds. */
+  transition: opacity 460ms ease 200ms;
+}
+
+.reel__quote {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.3vw, 1.65rem);
+  font-weight: 400;
+  line-height: 1.42;
+  letter-spacing: -0.011em;
+  color: var(--color-text-primary);
+  text-wrap: balance;
+  text-shadow:
+    0 2px 28px color-mix(in srgb, var(--color-bg) 92%, transparent),
+    0 1px 4px color-mix(in srgb, var(--color-bg) 78%, transparent);
+}
+
+/* The marks are set here rather than in the data, so the quotes stay
+   plain text in the markup and every one of them is punctuated alike. */
+.reel__quote::before { content: "\201C"; }
+.reel__quote::after  { content: "\201D"; }
+
+/* The same tracked capitals the section labels are set in, so the name
+   reads as part of the site rather than as part of the picture. */
+.reel__said {
+  margin-top: clamp(0.8rem, 1.7vw, 1.2rem);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  text-shadow: 0 1px 16px color-mix(in srgb, var(--color-bg) 92%, transparent);
 }
 
 /* ── The wordmark's section ─────────────────────────────────── */
@@ -975,6 +1099,15 @@ a { color: var(--color-link); }
 @media (max-width: 560px) {
   .hero__cue { display: none; }
   .purchase .btn { flex: 1; }
+
+  /* No cue to clear, so the quote drops to where it was hanging above.
+     The frame is near square on a phone and the picture is contained, so
+     this lands on the blurred fill below it rather than over the face. */
+  .reel__caption {
+    --caption-lift: clamp(3.5rem, 11vh, 6rem);
+    width: min(34rem, 90vw);
+    min-height: 9.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
