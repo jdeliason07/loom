@@ -17,6 +17,7 @@ python3 -m http.server 8000   # → http://localhost:8000
 ```
 index.html                     the storefront
 thanks.html                    order confirmation — fires the Purchase event
+leaderboard.html               what each creator has earned, ranked
 shipping.html privacy.html terms.html    the three Stripe asks for
 404.html  robots.txt  sitemap.xml  site.webmanifest  favicon.ico
 assets/js/config.js            THE ONLY FILE TO EDIT TO GO LIVE
@@ -27,6 +28,8 @@ assets/img/og.jpg              the 1200x630 share card
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
 assets/js/app.js               the iris, order drawer, cart state, film-to-reel handover
+assets/js/leaderboard.js       draws the leaderboard from /api/leaderboard
+api/leaderboard.mjs            that endpoint — the one server-side file, holds the Stripe key
 assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
 assets/img/reel/01–32.webp     the archive reel of creators, in Who we are
 assets/video/intro.mp4/.webm   the film, framed in Who we are — plays on a tap
@@ -38,7 +41,10 @@ assets/img/no-01.webp/.jpg     the No. 01 photograph — the pair, on a desk in 
 
 Hosting is **Vercel, already configured**, so this repo intentionally contains
 **no** deployment configuration: no GitHub Actions workflow, no `vercel.json`,
-no Pages settings. The site is served straight from the repository root — there
+no Pages settings. The single server-side file is `api/leaderboard.mjs`, which
+Vercel picks up automatically because it is in `/api`; it needs environment
+variables set in the dashboard, but no configuration in the repository and no
+build step. The site is served straight from the repository root — there
 is nothing to build and no output directory to point at. If Vercel's project
 settings ask for a framework preset, it's "Other"; leave the build command
 empty and the output directory as the root.
@@ -61,6 +67,8 @@ empty and the output directory as the root.
 There is no Trusted-by section. It shipped once, with placeholder creators,
 and came out again: a proof section with no real proof shouldn't be on the
 page. It belongs back only once real creators have agreed to be on it.
+
+`leaderboard.html` sits outside that order, as a plain page.
 
 The page scrolls normally. The scroll-snap paging and the wheel driver that
 earlier versions carried are gone with the full-screen reel they served; the
@@ -260,6 +268,71 @@ ask Stripe what was actually charged, so a two-bottle order is still reported as
 $89 — under-reporting, which is the safe direction, and the true figures are in
 Stripe. A webhook into the Conversions API is the fix when the ad spend
 justifies it.
+
+## The leaderboard
+
+`leaderboard.html` shows what each creator has earned, ranked, and updates
+itself. The line under it points people at the Instagram and TikTok accounts
+to ask about joining.
+
+The page fetches `/api/leaderboard` and draws whatever comes back. It holds no
+key and never talks to Stripe — everything in `assets/js/` is readable by
+anyone who opens view-source, so nothing secret can live there.
+
+### Why there is a function at all
+
+This is otherwise a static site, and the README above says it carries no
+deployment configuration. `api/leaderboard.mjs` is the one exception, and it
+exists because a Stripe secret key can read every customer's name, address and
+email, issue refunds, and change where payouts land. There is no arrangement
+in which that key can be shipped to a browser. So it lives in Vercel's
+environment, the function reads it server-side, and the browser only ever
+receives handles and totals.
+
+No `vercel.json` is needed: anything in `/api` is picked up automatically, and
+there is still no build step.
+
+### Configuring it
+
+Set these in **Vercel → Project → Settings → Environment Variables**, then
+redeploy. Nothing goes in this repository.
+
+| Variable | Default | |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | — | Required. Use a **restricted** key with read access to Checkout Sessions and nothing else. |
+| `LEADERBOARD_RATE` | `20` | Commission percentage. |
+| `LEADERBOARD_MIN` | `1` | Hide creators below this many orders. |
+
+Until `STRIPE_SECRET_KEY` is set the endpoint answers with an empty board and
+`ready: false`, sent `no-store`, so the page reads "no sales yet" rather than
+breaking and starts working the moment the variable is added — no cache to
+wait out.
+
+### What it reads, and what it does not
+
+It reads **Checkout Sessions**, not Charges. `client_reference_id` — the token
+`track.js` builds — lives on the session and is not copied onto the
+PaymentIntent or the Charge, so the payments list is the wrong end to read it
+from. Refunds are deducted (the charge is expanded for `amount_refunded`, so a
+refunded order earns nobody a commission) and sessions that completed without
+being paid are skipped.
+
+The response carries handles, order counts and totals. No customer name, email
+or address is read from Stripe, let alone returned. Stripe's own error text can
+name the key, so failures are logged server-side and the caller is told only
+that the board is empty.
+
+Responses are cached at Vercel's edge for five minutes, with ten more of
+stale-while-revalidate. Without that, every page view would be a round trip to
+Stripe and the rate limit would be the ceiling on traffic.
+
+### What the handle is
+
+A label chosen when the link was minted, not a verified account. `?ref=janedoe`
+is an arbitrary string; using someone's handle is a convention that makes the
+payments list readable. It arrives from a query string a stranger controls, so
+the function reduces it to `[a-z0-9-]` and clips it, and the page renders it as
+plain text and never links it to a profile that may not be theirs.
 
 ## Knowing which creator sold it
 

@@ -1,0 +1,5 @@
+# Local only. The generator reads the Stripe key from the environment;
+# it must never reach the repository.
+.env
+.env.*
+node_modules/

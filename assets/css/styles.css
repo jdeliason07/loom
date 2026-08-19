@@ -603,6 +603,77 @@ a { color: var(--ink-2); }
   text-align: center;
 }
 
+/* ── The leaderboard ────────────────────────────────────────
+   leaderboard.html only. A table rather than a grid of cards:
+   the whole point is comparing one column down its length. */
+.vh {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+.board { margin-top: clamp(2rem, 5vw, 3rem); }
+.board__state {
+  padding: clamp(1.75rem, 5vw, 2.75rem);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+  color: var(--ink-3);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.board__table { width: 100%; border-collapse: collapse; }
+.board__table thead th {
+  padding: 0 0 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.board__table tbody td {
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+  color: var(--ink-2);
+  vertical-align: baseline;
+}
+.board__table tbody tr:last-child td { border-bottom: 0; }
+
+.board__rank {
+  width: 2.5rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.board__who { color: var(--ink); font-weight: 500; }
+.board__num { text-align: right; font-variant-numeric: tabular-nums; }
+.board__earned { color: var(--ink); font-weight: 600; }
+
+/* The top three carry the accent, which is the only ornament the
+   table gets — a medal column would be one more thing to read. */
+.board__table tbody tr.is-top .board__rank,
+.board__table tbody tr.is-top .board__earned { color: var(--accent); }
+
+.board__updated { margin-top: 1rem; font-size: 0.8rem; color: var(--ink-3); }
+
+.board__join {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-top: clamp(1.25rem, 3vw, 1.75rem);
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+.board__join a { color: var(--ink-2); }
+
+@media (max-width: 460px) {
+  .board__table thead th { font-size: 0.65rem; letter-spacing: 0.12em; }
+  .board__rank { width: 1.75rem; }
+}
+
 /* ── Footer ─────────────────────────────────────────────────── */
 .site-footer {
   border-top: 1px solid var(--line);
