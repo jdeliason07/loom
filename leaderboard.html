@@ -32,11 +32,10 @@
     <p class="page__lead">What the people selling No.&thinsp;01 have earned.
       Straight from the payments, refunds already taken off.</p>
 
-    <!-- Filled by leaderboard.js from assets/data/leaderboard.json, which
-         tools/leaderboard.mjs writes. Static: the JSON is generated on
-         somebody's machine and committed, because a page served from a
-         repository has nowhere to keep a Stripe key that visitors
-         cannot read. -->
+    <!-- Filled by leaderboard.js from /api/leaderboard. The Stripe key
+         lives in Vercel's environment and is read by that function
+         server-side; nothing on this page, or in any file it loads,
+         could hold one without publishing it. -->
     <div class="board" id="board">
       <p class="board__state" id="board-state">Loading…</p>
 

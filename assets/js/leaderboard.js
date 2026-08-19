@@ -1,20 +1,21 @@
 /* ============================================================
    vates — the leaderboard
 
-   Reads assets/data/leaderboard.json and draws the table. The
-   JSON is written by tools/leaderboard.mjs against the Stripe
-   API, on somebody's own machine; nothing here talks to Stripe
-   and nothing here needs a key, which is the point — a static
-   site has nowhere to keep one that visitors cannot read.
+   Reads /api/leaderboard and draws the table. That endpoint is
+   a serverless function: it holds the Stripe key, runs on
+   Vercel's machines, and hands back handles and totals only.
+   Nothing here has a key, and nothing here talks to Stripe —
+   which is the point, because everything in this file is
+   readable by anyone who opens view-source.
 
-   The file may legitimately not exist yet. That is the state
-   the page ships in, so it is a first-class case rather than an
-   error: nobody has sold anything, and the page says so.
+   The endpoint may legitimately have nothing to report: no key
+   set yet, or no sales. Both come back as an empty board rather
+   than an error, and the page says so plainly.
    ============================================================ */
 (function () {
   "use strict";
 
-  var SRC = "assets/data/leaderboard.json";
+  var SRC = "/api/leaderboard";
 
   var state = document.getElementById("board-state");
   var table = document.getElementById("board-table");
@@ -95,10 +96,12 @@
     }
   }
 
-  /* Cache-busted: the JSON changes without the page changing, and a
-     stale leaderboard is worse than a slow one when it is what people
-     are being paid against. */
-  fetch(SRC + "?t=" + Date.now(), { cache: "no-store" })
+  /* The endpoint sets its own caching — five minutes at Vercel's edge,
+     and no-store while it is unconfigured so it starts working the
+     moment the key is set without anyone waiting out a cache. A 404 is
+     the local case: served from a plain file server with no functions
+     behind it, which is not an error worth showing a visitor. */
+  fetch(SRC)
     .then(function (res) {
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("HTTP " + res.status);
