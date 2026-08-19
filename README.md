@@ -1,6 +1,6 @@
 # VATES
 
-Single-product storefront for **No. 01** — a one-piece borosilicate glass bottle, $49.
+Single-product storefront for **No. 01** — a one-piece borosilicate glass bottle, $89.
 
 Static site: plain HTML, CSS and JS. No framework, no build step, no dependencies.
 
@@ -50,14 +50,17 @@ empty and the output directory as the root.
    tagline and promise at the bottom of the same screen.
 2. **Who we are** — the manifesto, centred, with the film framed under it.
    When the film ends, the archive reel of creators takes over its frame.
-3. **The bottle** — photograph, claim, price, Purchase.
-4. **Trusted by** — a three-by-five grid of creators. The names and portraits
-   are placeholders (silhouettes, with fineprint on the page saying so) until
-   real creators grant permission; nothing here may imply an endorsement that
-   does not exist.
-5. **In hand** — the specs. Height and weight are dashes until the spec sheet
+3. **The bottle** — photograph, claim, price, Purchase, and the edition line
+   (below).
+4. **In hand** — the specs. Height and weight are dashes until the spec sheet
    fills them.
+5. **The closing ask** — a last full-width Purchase, then the waitlist for
+   anyone not ready yet.
 6. **Footer.**
+
+There is no Trusted-by section. It shipped once, with placeholder creators,
+and came out again: a proof section with no real proof shouldn't be on the
+page. It belongs back only once real creators have agreed to be on it.
 
 The page scrolls normally. The scroll-snap paging and the wheel driver that
 earlier versions carried are gone with the full-screen reel they served; the
@@ -224,6 +227,21 @@ unconfigured checkout can never present a dead button.
 `pixels.ga4` you are using. An empty string means that platform's script is
 never fetched, so unused pixels cost nothing at all.
 
+**4. The edition line.** `product.edition.total` is 500 and `number` is
+`null`, so the bottle section reads "An edition of 500 — numbered by hand" —
+true as long as the run really is capped there. Once real inventory exists
+(Stripe is the source of truth), set `number` and the line upgrades itself to
+"No. 041 of 500" with no other change. Never set it from anything that counts
+up on its own: a figure nobody put there on purpose is fabricated scarcity,
+and both the FTC and the CMA treat a live-ticking claim of demand as a
+deceptive practice, not a growth hack.
+
+**5. The waitlist.** The form at the foot of the page has nowhere to send an
+address yet — `app.js` shows "The waitlist isn't connected yet" and stops
+there. Point its `submit` handler at a real endpoint (a form service such as
+Formspree or Buttondown, or a small serverless function) before this ships,
+and once it collects an email address, say so on the privacy page.
+
 ## The checkout
 
 Two taps: Purchase opens the drawer, the drawer's Checkout leaves for Stripe.
@@ -239,7 +257,7 @@ differently; the mapping is one table in `track.js` and callers say "view",
 
 `thanks.html` reports the list price of one bottle. There is no server here to
 ask Stripe what was actually charged, so a two-bottle order is still reported as
-$49 — under-reporting, which is the safe direction, and the true figures are in
+$89 — under-reporting, which is the safe direction, and the true figures are in
 Stripe. A webhook into the Conversions API is the fix when the ad spend
 justifies it.
 

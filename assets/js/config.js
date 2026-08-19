@@ -47,12 +47,26 @@ window.VATES = {
   },
 
   /* One description of the product, so the page, the structured data
-     and the conversion events cannot drift apart. */
+     and the conversion events cannot drift apart. track.js reads
+     product.price for every conversion it reports to the ad platforms —
+     it is not just copy, changing it here is the whole of the change. */
   product: {
     id: "no-01",
     sku: "VATES-NO01",
     name: "No. 01",
-    price: 49,
-    currency: "USD"
+    price: 89,
+    currency: "USD",
+
+    /* The edition line under the price. Leave number unset and the page
+       reads "An edition of 500 — numbered by hand" — true as long as the
+       run is actually capped at `total`. Set number once real inventory
+       exists (Stripe is the source of truth) and it upgrades on its own
+       to "No. 041 of 500". Never set this from anything that counts up
+       by itself — a live-ticking figure is fabricated scarcity, and both
+       the FTC and the CMA treat it as a deceptive practice. */
+    edition: {
+      total: 500,
+      number: null
+    }
   }
 };

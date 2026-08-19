@@ -10,7 +10,7 @@
   var PRODUCT = {
     id: "no-01",
     name: "No. 01",
-    price: 49,
+    price: 89,
     /* The drawer shows the bottle on its own — at 4.5rem a whole
        room is a smudge. */
     image: "assets/img/no-01-thumb.webp",
@@ -230,6 +230,28 @@
 
   if (el.year) el.year.textContent = String(new Date().getFullYear());
 
+  /* The edition line, from config.js. With no number set it stays as
+     written in the markup — "An edition of 500 — numbered by hand" —
+     which is honest as long as the run is actually capped at the total.
+     Set product.edition.number once real inventory exists (the Stripe
+     dashboard is the source of truth) and this upgrades it on its own.
+     Never wired to anything that counts up by itself: a figure nobody
+     placed there on purpose is fabricated scarcity, not a feature. */
+  (function () {
+    var editionEl = document.getElementById("product-edition");
+    if (!editionEl) return;
+    var edition = (window.VATES && window.VATES.product && window.VATES.product.edition) || {};
+    var total = edition.total;
+    var number = edition.number;
+    if (number != null && total != null) {
+      var padded = String(number);
+      while (padded.length < 3) padded = "0" + padded;
+      editionEl.textContent = "No. " + padded + " of " + total + " — numbered by hand";
+    } else if (total != null) {
+      editionEl.textContent = "An edition of " + total + " — numbered by hand";
+    }
+  })();
+
   /* Fires once on load. It is what the ad platforms build their
      retargeting audiences from — everyone who saw the bottle and did
      not buy it yet. */
@@ -281,13 +303,24 @@
 
   /* Purchase opens the drawer; the drawer's Checkout is what leaves for
      Stripe. The step in between is where "What's in the box" gets read,
-     which is the last thing anyone wants to know before paying. */
-  el.form.addEventListener("submit", function (event) {
-    event.preventDefault();
+     which is the last thing anyone wants to know before paying. Two
+     controls lead here — the bottle section's form and the closing
+     band's plain button — so the behaviour lives in one place and both
+     just call it. */
+  function purchase() {
     hideNotice();
     addToCart(1);
     openDrawer();
     if (window.VATES_TRACK) window.VATES_TRACK.track("add");
+  }
+
+  el.form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    purchase();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-purchase]"), function (btn) {
+    btn.addEventListener("click", purchase);
   });
 
   // drawer line-item controls
@@ -333,6 +366,22 @@
       trapTab(event);
     }
   });
+
+  /* The waitlist has nowhere to send an address yet. A static site can't
+     collect one on its own — this wants a real endpoint (a form service,
+     or a small serverless function) before it goes live, and once it has
+     one, collecting emails belongs in the privacy page too. Until then
+     the form says so rather than pretending to have sent anything. */
+  var waitlist = document.getElementById("waitlist");
+  if (waitlist) {
+    waitlist.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var note = document.getElementById("waitlist-note");
+      if (!note) return;
+      note.textContent = "The waitlist isn't connected yet — nothing was sent.";
+      note.hidden = false;
+    });
+  }
 
   render();
 
