@@ -71,9 +71,10 @@ payouts, and those stay manual until the volume hurts.
    the parcel has landed rather than before — it reads as a favour after the
    fact and as an obligation before it.
 
-6. **Follow up once.** Ask whether it arrived. If they ticked the paid-ads
-   box on the form, this is when the actual terms get agreed — how long,
-   which platforms, what it pays — in writing, before anything runs. Creator
+6. **Follow up once.** Ask whether it arrived. If there is any interest in
+   running their video as a paid ad, this is when the actual terms get
+   agreed — how long, which platforms, what it pays — in writing, before
+   anything runs. Creator
    footage does tend to outperform studio footage as paid social, which is
    exactly why it is worth paying properly for rather than assuming a free
    bottle bought it.
