@@ -56,23 +56,45 @@ empty and the output directory as the root.
    tagline and promise at the bottom of the same screen.
 2. **Who we are** — the manifesto, centred, with the film framed under it.
    When the film ends, the archive reel of creators takes over its frame.
-3. **The bottle** — photograph, claim, price, Purchase, and the edition line
-   (below).
-4. **In hand** — the specs. Height and weight are dashes until the spec sheet
+3. **The bridge** — "Vision needs a vessel", the handoff from why to what.
+4. **The bottle** — photograph, claim, the offer, and the edition line (below).
+5. **The Vates Standard** — the four rules, numbered.
+6. **Vates Creators** — a three-by-five grid of slots (below).
+7. **In hand** — the specs. Height and weight are dashes until the spec sheet
    fills them.
-5. **The closing ask** — a last full-width Purchase, then the waitlist for
+8. **The closing ask** — a last full-width Purchase, then the waitlist for
    anyone not ready yet.
-6. **Footer.**
-
-There is no Trusted-by section. It shipped once, with placeholder creators,
-and came out again: a proof section with no real proof shouldn't be on the
-page. It belongs back only once real creators have agreed to be on it.
+9. **Footer.**
 
 `leaderboard.html` sits outside that order, as a plain page.
 
+### The rhythm, and the dividers
+
+Every band carries the same padding above and below (`--section-y`). They used
+to have a top and no bottom, which read fine while sections ran together; once
+the band filaments divided them, an asymmetric section put the line hard
+against the content above it. Equal on both sides, a divider always lands
+centred.
+
+The filaments fall at five seams: after the opening, after the film, after the
+bottle, after the Standard, and after the creators. Two seams have none on
+purpose — the bridge leans into the bottle it introduces (half rhythm below
+it, so the two read as one movement), and the closing ask carries its own rule
+and darker ground instead.
+
 The page scrolls normally. The scroll-snap paging and the wheel driver that
 earlier versions carried are gone with the full-screen reel they served; the
-one piece of scroll choreography left is the cue at the foot of the opening.
+scroll choreography left is the cue at the foot of the opening and the iris
+opening with the scroll.
+
+### Vates Creators
+
+The grid holds fifteen slots, and every one of them is **unnamed** — a dash
+where the name goes. It shipped once with invented creators, which is an
+endorsement nobody gave, and came out again. Empty slots hold the layout
+without claiming anything untrue. Replace a silhouette and its dash together,
+or leave the card out; a face with no name, or a name with no face, is worse
+than an empty square.
 
 ## The opening
 
@@ -81,6 +103,15 @@ in the wordmark's six band colours breathing out of step around a dark pupil,
 with fine spokes wheeling slowly. It runs only while the hero is on screen and
 the tab is visible, and under `prefers-reduced-motion` it draws one still frame
 and stops. The ticker is pure CSS; its squares are the six bands.
+
+It **opens with the scroll**: across the first screen of travel the rings widen
+outward and dissolve, so scrolling reads as an aperture opening rather than a
+picture sliding away. The travel is eased rather than linear — a straight ramp
+reads as the canvas being dragged. The pupil fades with the rings, because it
+is painted in the page's own ground and would otherwise sit over the section
+below as a dark disc. The scroll listener is passive and only sets a number;
+it is read inside a frame that was already being drawn, so it schedules no
+work of its own, and reduced motion never reaches it.
 
 Two voices share the page: Fraunces (self-hosted, one latin variable file)
 speaks the statement lines — the tagline, the manifesto headline — and the

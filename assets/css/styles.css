@@ -69,6 +69,13 @@
     #76b856 0 16.667%, #f2ba4b 16.667% 33.333%, #e3873d 33.333% 50%,
     #cf4743 50% 66.667%, #8b4192 66.667% 83.333%, #4698d3 83.333% 100%);
 
+  /* The vertical rhythm every band shares. Sections used to carry a top
+     padding and no bottom, which read fine while they ran together; with
+     the band filaments dividing them, an asymmetric section puts the line
+     hard against the content above it. Equal on both sides, so a divider
+     always lands centred between two sections. */
+  --section-y: clamp(4.5rem, 10vw, 8rem);
+
   --radius-sm: 10px;   /* controls: buttons, inputs, steppers */
   --radius-md: 14px;   /* small panels: thumbs, notices */
   --radius-lg: 22px;   /* cards and surfaces */
@@ -310,7 +317,7 @@ a { color: var(--ink-2); }
 }
 
 /* ── Who we are ─────────────────────────────────────────────── */
-.about { padding-block: clamp(4.5rem, 10vw, 8rem) 0; }
+.about { padding-block: var(--section-y); }
 .about__inner { display: grid; justify-items: center; text-align: center; }
 .about__title {
   margin-top: 1rem;
@@ -331,6 +338,100 @@ a { color: var(--ink-2); }
   text-wrap: pretty;
 }
 .about__body + .about__body { margin-top: 0.8rem; }
+
+/* The three "the ones who…" lines read as a stanza, so they are set
+   closer than prose and a shade brighter than the lines around them. */
+.about__body--creed {
+  margin-top: 1.6rem;
+  line-height: 1.9;
+  color: var(--ink);
+}
+.about__body--close {
+  margin-top: 1.6rem;
+  font-family: var(--font-display);
+  font-weight: 480;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+/* ── The bridge: vision to vessel ───────────────────────────
+   A held breath between the manifesto and the object. Full rhythm
+   above, half below: "Meet No. 01" is an introduction, so it leans
+   into the bottle rather than standing a whole band away from it.
+   This is the one seam on the page with no divider under it,
+   because the two halves are one movement. */
+.bridge { padding-block: var(--section-y) calc(var(--section-y) * 0.5); }
+.bridge__inner { display: grid; justify-items: center; text-align: center; }
+.bridge__title {
+  font-family: var(--font-display);
+  font-weight: 480;
+  font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.bridge__line {
+  margin-top: 0.9rem;
+  font-size: clamp(1.02rem, 1.8vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.bridge__line:first-of-type { margin-top: clamp(1.6rem, 3.5vh, 2.4rem); }
+.bridge__meet {
+  margin-top: clamp(2rem, 4.5vh, 3rem);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ── The Vates Standard ─────────────────────────────────────
+   Numbered because it is a creed with an order to it, not a feature
+   list: each line is a rule that earns its position. */
+.standard { padding-block: var(--section-y); }
+.standard__inner { display: grid; justify-items: center; text-align: center; }
+.standard__list {
+  /* The reset above only clears <ul>; this is an <ol> and brings its own
+     markers, which would sit beside the counter below. */
+  margin: clamp(1.8rem, 4vw, 2.8rem) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: standard;
+  display: grid;
+  gap: clamp(1.4rem, 3vw, 2rem);
+  max-width: 30ch;
+}
+.standard__list li {
+  counter-increment: standard;
+  font-family: var(--font-display);
+  font-weight: 480;
+  font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+  line-height: 1.35;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.standard__list li::before {
+  content: counter(standard, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.3rem;
+  font-family: var(--font);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.standard__close {
+  margin-top: clamp(2.2rem, 5vw, 3.2rem);
+  padding-top: clamp(1.4rem, 3vw, 2rem);
+  border-top: 1px solid var(--line);
+  width: min(30ch, 100%);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
 
 .about__media {
   margin-top: clamp(2rem, 4.5vw, 3.2rem);
@@ -391,7 +492,7 @@ a { color: var(--ink-2); }
 .about__caption { margin-top: 0.7rem; text-align: center; font-size: 0.74rem; color: var(--ink-3); }
 
 /* ── The bottle ─────────────────────────────────────────────── */
-.product { padding-block: clamp(4.5rem, 10vw, 8rem) 0; }
+.product { padding-block: var(--section-y); }
 .product__grid {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -399,6 +500,7 @@ a { color: var(--ink-2); }
   align-items: center;
 }
 .product__stage { position: relative; display: grid; place-items: center; padding-block: 1rem; }
+.product__detail { padding-block: 1rem; }
 .product__halo {
   position: absolute;
   width: min(26rem, 84%);
@@ -451,11 +553,23 @@ a { color: var(--ink-2); }
   line-height: 1.5;
   color: var(--ink-2);
 }
-.product__price {
+.product__spec {
+  margin-top: 1rem;
+  max-width: 34ch;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.product__offer {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
   font-size: clamp(1.5rem, 2.4vw, 1.9rem);
   font-weight: 500;
-  font-variant-numeric: tabular-nums;
 }
+.product__variant { letter-spacing: 0.01em; }
+.product__dash { color: var(--ink-3); }
+.product__price { font-variant-numeric: tabular-nums; }
 .purchase {
   margin-top: clamp(1.6rem, 3vh, 2.2rem);
   display: flex;
@@ -473,8 +587,58 @@ a { color: var(--ink-2); }
   font-variant-numeric: tabular-nums;
 }
 
+/* ── Vates Creators ─────────────────────────────────────────
+   Fifteen square slots, three across. Unnamed until real creators
+   and their headshots arrive. */
+.trust { padding-block: var(--section-y); }
+.trust__head { text-align: center; display: grid; justify-items: center; }
+.trust__lead {
+  margin-top: 0.9rem;
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  font-weight: 500;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.trust__grid {
+  margin-top: clamp(2rem, 4.5vw, 3.2rem);
+  width: min(720px, 100%);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.9rem, 2.5vw, 1.6rem) clamp(0.8rem, 2vw, 1.4rem);
+}
+.trust__card { margin: 0; text-align: center; }
+.trust__face {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: rgba(244, 238, 227, 0.32);   /* the silhouette's ink */
+}
+/* Each square tinted from one of the wordmark's bands, kept near the
+   ground so the grid reads warm and even, not like a flag. */
+.trust__face--1 { background: color-mix(in srgb, #76b856 12%, var(--panel)); }
+.trust__face--2 { background: color-mix(in srgb, #f2ba4b 12%, var(--panel)); }
+.trust__face--3 { background: color-mix(in srgb, #e3873d 12%, var(--panel)); }
+.trust__face--4 { background: color-mix(in srgb, #cf4743 12%, var(--panel)); }
+.trust__face--5 { background: color-mix(in srgb, #8b4192 12%, var(--panel)); }
+.trust__face--6 { background: color-mix(in srgb, #4698d3 12%, var(--panel)); }
+.trust__name {
+  margin-top: 0.65rem;
+  font-size: clamp(0.84rem, 1.5vw, 0.98rem);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+.trust__fineprint {
+  margin-top: clamp(1.6rem, 3vw, 2.2rem);
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--ink-3);
+}
+
 /* ── In hand ────────────────────────────────────────────────── */
-.specs { padding-block: clamp(4rem, 9vw, 7rem); }
+.specs { padding-block: var(--section-y); }
 .specs__grid {
   margin-top: clamp(1.8rem, 4vw, 2.8rem);
   display: grid;
@@ -555,7 +719,7 @@ a { color: var(--ink-2); }
 
 /* ── The closing ask ────────────────────────────────────────── */
 .cta {
-  padding-block: clamp(4.5rem, 10vw, 8rem);
+  padding-block: var(--section-y);
   background: var(--ground-deep);
   border-top: 1px solid var(--line);
 }

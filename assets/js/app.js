@@ -405,6 +405,22 @@
     var t = 0, raf = 0, lastFrame = 0, running = false, heroVisible = true;
     var rings = [];
 
+    /* How far the opening has been scrolled through: 0 at rest, 1 once the
+       hero is a screen behind. The iris opens outwards across that travel
+       and dissolves as it goes, so scrolling reads as the eye widening
+       rather than as a picture sliding away. Passive, and the value is
+       only read inside a frame that is already being drawn — nothing here
+       schedules work of its own. Reduced motion never reaches it: the
+       canvas paints one still frame and the loop does not run. */
+    var scrollP = 0;
+    var readScroll = function () {
+      var span = Math.max(window.innerHeight * 0.9, 1);
+      var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+      scrollP = Math.min(1, Math.max(0, y / span));
+    };
+    window.addEventListener("scroll", readScroll, { passive: true });
+    readScroll();
+
     var seed = function () {
       rings = [];
       for (var i = 0; i < 16; i++) {
@@ -422,18 +438,26 @@
     var draw = function () {
       ctx.clearRect(0, 0, W, H);
       var cx = W / 2, cy = H * 0.52;
-      var R = Math.min(W * 0.46, H * 0.44) * (1 + 0.02 * Math.sin(t * 0.5));
+
+      /* Eased, so the opening is unhurried at the top of the travel and
+         accelerates away — a linear ramp reads as the canvas being
+         dragged, this reads as an aperture. */
+      var p = scrollP * scrollP * (3 - 2 * scrollP);
+      var open = 1 + p * 1.45;          /* how far the rings have widened */
+      var fade = 1 - p * 0.88;          /* and how much is left of them */
+
+      var R = Math.min(W * 0.46, H * 0.44) * (1 + 0.02 * Math.sin(t * 0.5)) * open;
       var i;
 
       /* the glow behind everything */
       var glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
-      glow.addColorStop(0, "rgba(227, 135, 61, 0.16)");
+      glow.addColorStop(0, "rgba(227, 135, 61, " + (0.16 * fade).toFixed(4) + ")");
       glow.addColorStop(1, "rgba(227, 135, 61, 0)");
       ctx.fillStyle = glow;
       ctx.fillRect(cx - R * 1.7, cy - R * 1.7, R * 3.4, R * 3.4);
 
       /* fine spokes, slowly wheeling */
-      ctx.strokeStyle = "rgba(" + PAPER + ", 0.07)";
+      ctx.strokeStyle = "rgba(" + PAPER + ", " + (0.07 * fade).toFixed(4) + ")";
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (i = 0; i < SPOKES; i++) {
@@ -451,20 +475,22 @@
         ctx.beginPath();
         ctx.arc(cx, cy, Math.max(1, rr), 0, Math.PI * 2);
         ctx.strokeStyle = g.color;
-        ctx.globalAlpha = g.a * (0.8 + 0.2 * Math.sin(t * g.sp * 1.3 + g.ph));
+        ctx.globalAlpha = g.a * (0.8 + 0.2 * Math.sin(t * g.sp * 1.3 + g.ph)) * fade;
         ctx.lineWidth = 1 + (i % 3) * 0.7;
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
 
-      /* the pupil, and one still point of light */
+      /* The pupil opens with the rings. It is painted in the page's own
+         ground, so it has to fade too — left solid it would sit over the
+         section below as a dark disc once the rings had gone. */
       var pu = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.36);
-      pu.addColorStop(0, "rgba(" + GROUND + ", 1)");
-      pu.addColorStop(0.85, "rgba(" + GROUND + ", 1)");
+      pu.addColorStop(0, "rgba(" + GROUND + ", " + fade.toFixed(4) + ")");
+      pu.addColorStop(0.85, "rgba(" + GROUND + ", " + fade.toFixed(4) + ")");
       pu.addColorStop(1, "rgba(" + GROUND + ", 0)");
       ctx.fillStyle = pu;
       ctx.beginPath(); ctx.arc(cx, cy, R * 0.36, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "rgba(" + PAPER + ", 0.9)";
+      ctx.fillStyle = "rgba(" + PAPER + ", " + (0.9 * fade).toFixed(4) + ")";
       ctx.beginPath(); ctx.arc(cx - R * 0.09, cy - R * 0.11, 2.4, 0, Math.PI * 2); ctx.fill();
     };
 

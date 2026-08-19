@@ -88,6 +88,17 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<!-- The slot portrait for Vates Creators: a silhouette holding each
+     square until a real headshot and name replace it. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="avatar-sil" fill="currentColor">
+      <circle cx="32" cy="25" r="10.5"/>
+      <path d="M11.5 58 c2.5 -14.5 10.5 -20.5 20.5 -20.5 s18 6 20.5 20.5 z"/>
+    </g>
+  </defs>
+</svg>
+
 <main id="main">
 
   <!-- ── The opening: the mark and the words, over the seer's eye ──
@@ -209,11 +220,14 @@
     <div class="container about__inner">
       <p class="label">Who we are</p>
       <h2 class="about__title">We make essentials for people who make things.</h2>
-      <p class="about__body"><i>Vates</i> is Latin — the poet-prophet, the one who
-        sees what isn't there yet. That's who we build for.</p>
-      <p class="about__body">Our objects have one job each, done completely, so
-        nothing on your desk asks for the attention that belongs to the vision.
-        No.&thinsp;01, a water bottle in one piece of glass, is the first.</p>
+      <p class="about__body"><i>Vates</i> is Latin for the poet, prophet, and seer —
+        the one who sees what isn't there yet.</p>
+      <p class="about__body">That's who we build for.</p>
+      <p class="about__body about__body--creed">The ones who question the obvious.<br>
+        The ones who create more than they consume.<br>
+        The ones who would rather build their own path than inherit someone else's.</p>
+      <p class="about__body about__body--close">The future belongs to those willing
+        to see it first.</p>
 
       <div class="about__media">
         <div class="about__panel">
@@ -241,6 +255,21 @@
     </div>
   </section>
 
+  <hr class="filament" aria-hidden="true">
+
+  <!-- ── The bridge: from the vision to the object ────────────
+       The one seam with no divider under it: the bridge leans into
+       the bottle it introduces, so the two read as one movement. -->
+  <section class="bridge" id="bridge">
+    <div class="container bridge__inner">
+      <h2 class="bridge__title">Vision needs a vessel.</h2>
+      <p class="bridge__line">Something you reach for every day.</p>
+      <p class="bridge__line">Something that sits beside the work.</p>
+      <p class="bridge__line">Something that reminds you why you're doing it.</p>
+      <p class="bridge__meet">Meet No.&thinsp;01.</p>
+    </div>
+  </section>
+
   <!-- ── The bottle ──────────────────────────────────────────── -->
   <section class="product" id="product">
     <div class="container product__grid">
@@ -262,12 +291,16 @@
       <div class="product__detail">
         <p class="label">The bottle</p>
         <h2 class="product__title">No.&thinsp;01</h2>
-        <p class="product__claim">One piece of glass, so there is no seam to fail and
-          no liner to taste. Dishwasher safe, and it will outlast the desk you
-          leave it on.</p>
+        <p class="product__claim">A vessel for the work.</p>
+        <p class="product__spec">One piece of glass.<br>
+          No liner. No seam. No unnecessary complexity.</p>
+        <p class="product__spec">Designed to sit quietly beside you while you build
+          what's next.</p>
         <form class="purchase" id="purchase-form">
-          <span class="product__price">$89</span>
-          <button type="submit" class="btn btn--primary">Purchase</button>
+          <p class="product__offer"><span class="product__variant">Smoke</span>
+            <span class="product__dash" aria-hidden="true">&mdash;</span>
+            <span class="product__price">$89</span></p>
+          <button type="submit" class="btn btn--primary">Make it yours</button>
         </form>
         <!-- Reads window.VATES.product.edition in config.js. With no number
              set, this line stands as written — true as long as the run is
@@ -279,11 +312,64 @@
              CMA) second. -->
         <p class="product__edition" id="product-edition">An edition of 500 — numbered by hand</p>
         <p class="purchase__trust">
-          Free shipping · 30-day returns · Apple&nbsp;Pay and Google&nbsp;Pay
+          Free shipping · 30-day returns · Apple&nbsp;Pay · Google&nbsp;Pay
         </p>
       </div>
     </div>
   </section>
+
+  <hr class="filament" aria-hidden="true">
+
+  <!-- ── The Vates Standard ──────────────────────────────────── -->
+  <section class="standard" id="standard">
+    <div class="container standard__inner">
+      <p class="label">The Vates Standard</p>
+      <ol class="standard__list">
+        <li>Question what exists.</li>
+        <li>Create more than you consume.</li>
+        <li>Build for the future.</li>
+        <li>Don't let someone else's vision become the limit of your own.</li>
+      </ol>
+      <p class="standard__close">If you see it, build it.</p>
+    </div>
+  </section>
+
+  <hr class="filament" aria-hidden="true">
+
+  <!-- ── Vates Creators ───────────────────────────────────────
+       Fifteen slots, holding the layout until real creators and their
+       headshots arrive. Deliberately unnamed: an invented name under a
+       face is an endorsement nobody gave. Replace the silhouette and
+       the dash in each card together, or leave the card out. -->
+  <section class="trust" id="creators">
+    <div class="container">
+      <div class="trust__head">
+        <p class="label">Vates Creators</p>
+        <h2 class="trust__lead">The ones building with it.</h2>
+      </div>
+      <ul class="trust__grid">
+        <li class="trust__card"><svg class="trust__face trust__face--1" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--2" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--3" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--4" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--5" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--6" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--4" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--1" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--5" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--2" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--6" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--3" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--2" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--6" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+        <li class="trust__card"><svg class="trust__face trust__face--1" viewBox="0 0 64 64" role="img" aria-label="Creator slot, awaiting a portrait"><use href="#avatar-sil"/></svg><p class="trust__name">&mdash;</p></li>
+      </ul>
+      <p class="trust__fineprint">Fifteen slots, waiting on real creators — faces and
+        names to come.</p>
+    </div>
+  </section>
+
+  <hr class="filament" aria-hidden="true">
 
   <!-- ── In hand ─────────────────────────────────────────────── -->
   <section class="specs" id="specs">
