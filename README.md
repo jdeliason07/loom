@@ -29,7 +29,9 @@ assets/brand/loom-colors.css   the brand color system — imported first, unmodi
 assets/css/styles.css          storefront styles
 assets/js/app.js               the iris, order drawer, cart state, film-to-reel handover
 assets/js/leaderboard.js       draws the leaderboard from /api/leaderboard
-api/leaderboard.mjs            that endpoint — the one server-side file, holds the Stripe key
+api/leaderboard.mjs            that endpoint — reads Stripe, holds the Stripe key
+api/fulfill.mjs                the Stripe webhook that places the CJ order
+api/cj-callback.mjs            CJ telling us it shipped — writes the tracking number back
 assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
 assets/img/reel/01–32.webp     the archive reel of creators, in Who we are
 assets/video/intro.mp4/.webm   the film, framed in Who we are — plays on a tap
@@ -41,10 +43,9 @@ assets/img/no-01.webp/.jpg     the No. 01 photograph — the pair, on a desk in 
 
 Hosting is **Vercel, already configured**, so this repo intentionally contains
 **no** deployment configuration: no GitHub Actions workflow, no `vercel.json`,
-no Pages settings. The single server-side file is `api/leaderboard.mjs`, which
-Vercel picks up automatically because it is in `/api`; it needs environment
-variables set in the dashboard, but no configuration in the repository and no
-build step. The site is served straight from the repository root — there
+no Pages settings. The three server-side files are in `/api`, which Vercel
+picks up automatically; they need environment variables set in the dashboard,
+but no configuration in the repository and no build step. The site is served straight from the repository root — there
 is nothing to build and no output directory to point at. If Vercel's project
 settings ask for a framework preset, it's "Other"; leave the build command
 empty and the output directory as the root.
@@ -224,6 +225,8 @@ the `canonical`/`og:*` tags at the top of every page, `sitemap.xml`, and
 | Receipts | on | Stripe's receipt **is** the order confirmation. There is no server here to send one. |
 | After payment → redirect | `<siteUrl>/thanks.html?session_id={CHECKOUT_SESSION_ID}` | Without it no Purchase conversion is ever reported and the ad platforms have nothing to optimise towards. |
 | Adjustable quantity | on | It replaces the stepper that used to sit beside the button. |
+| Collect shipping address | on | Without it there is nothing to fulfil. `api/fulfill.mjs` skips a session that arrives without one, and says so in the log. |
+| Collect phone number | on | Several CJ carriers reject an order with no phone. `CJ_FALLBACK_PHONE` covers the gap if you would rather not ask. |
 
 Until a link is pasted, Purchase falls back to the demonstration drawer, so an
 unconfigured checkout can never present a dead button.
@@ -250,6 +253,87 @@ ask Stripe what was actually charged, so a two-bottle order is still reported as
 $49 — under-reporting, which is the safe direction, and the true figures are in
 Stripe. A webhook into the Conversions API is the fix when the ad spend
 justifies it.
+
+## Fulfilment
+
+The bottle is dropshipped by **CJdropshipping**. Nothing about that is visible
+from the storefront: Stripe takes the money exactly as before, and a webhook
+turns the payment into a CJ order without anyone opening a dashboard.
+
+```
+Stripe  ──checkout.session.completed──▶  /api/fulfill  ──createOrderV2──▶  CJ
+                                              │
+                                              └── cj_order_id onto the PaymentIntent
+
+CJ  ──ships──▶  /api/cj-callback  ──▶  tracking_number onto the same PaymentIntent
+```
+
+Both directions land on the PaymentIntent on purpose. The payment, the CJ order
+number and the tracking number end up as one row in the Stripe dashboard, so
+answering "where is my bottle" is one search rather than two tabs.
+
+### Why the metadata is the idempotency record
+
+There is no database in this project, and shipping two bottles for one payment
+costs real money. Stripe redelivers a webhook on any non-2xx and sometimes
+besides, so `fulfill.mjs` reads `payment_intent.metadata.cj_order_id` before it
+does anything and stops there if it is set. Stripe is the store.
+
+The write happens **after** CJ confirms, never before — a PaymentIntent marked
+fulfilled ahead of the fact would be a lie that suppresses every retry. Behind
+that sits a second guard: the CJ order number is the Stripe session id, and CJ
+refuses a repeated one, so two deliveries racing each other still produce one
+parcel.
+
+### Failure is retryable on purpose
+
+Anything that might work later answers **503**, and Stripe keeps redelivering
+for about three days. An unmapped variant, a bad minute at CJ, a token that
+would not mint — all of them become a late order rather than a lost one, and
+three days is long enough to notice an unset environment variable and fix it.
+
+The exception is a session with no shipping address, which answers 200. No
+number of retries can conjure an address that was never collected; the log line
+names the Payment Link setting that fixes it.
+
+### Configuring it
+
+Add these alongside the leaderboard's variables in **Vercel → Project →
+Settings → Environment Variables**. `STRIPE_SECRET_KEY` is shared with the
+leaderboard, but fulfilment needs to **write** PaymentIntent metadata, so the
+restricted key needs write access there as well as read on Checkout Sessions.
+
+| Variable | Default | |
+|---|---|---|
+| `STRIPE_WEBHOOK_SECRET` | — | Required. `whsec_…`, from the webhook endpoint's own page in Stripe. |
+| `CJ_API_KEY` | — | Required. CJ → Authorization → API Key. |
+| `CJ_VARIANTS` | — | Required. JSON, Stripe price id → CJ variant id: `{"price_1Pxyz":"92511400-C758-…","default":"92511400-C758-…"}`. The price id is the key to prefer; `default` covers a single-product store in one line. |
+| `CJ_FROM_COUNTRY` | `US` | Which CJ warehouse ships. `US` is what keeps the delivery estimates on `shipping.html` honest. |
+| `CJ_LOGISTIC` | — | A shipping method by name. Leave it unset and each order asks CJ for the cheapest one to that address, which is a call per order and cannot pick a method the route does not offer. |
+| `CJ_PAY_TYPE` | `2` | `2` pays from the CJ balance, which is what makes this automatic. `3` creates the order and leaves it for you to pay by hand — **start here**, and switch to `2` once you have watched a few orders land correctly. |
+| `CJ_FALLBACK_PHONE` | — | Used only when Stripe collected no phone number. |
+| `CJ_CALLBACK_SECRET` | — | Any long random string. It is the whole of the authentication on `/api/cj-callback`. |
+
+Then, in Stripe → Developers → Webhooks, add an endpoint at
+`<siteUrl>/api/fulfill` listening for `checkout.session.completed` and
+`checkout.session.async_payment_succeeded`. In CJ, set the callback URL to
+`<siteUrl>/api/cj-callback?key=<CJ_CALLBACK_SECRET>`.
+
+### The one thing that is guessed
+
+CJ does not publish its callback payload, so `cj-callback.mjs` reads the field
+names permissively — `orderNumber`, `orderNum`, `trackNumber`, `trackingNumber`
+and the rest all land, flat or nested under `data`. If none of them match, it
+answers 200 and logs the whole payload rather than failing, so the first real
+callback is never lost and the log is what makes the list correct. Read it once
+the first parcel ships.
+
+Everything in `fulfill.mjs` is written against the published API: `POST
+/authentication/getAccessToken` taking `{apiKey}`, `POST
+/shopping/order/createOrderV2`, `POST /logistic/freightCalculate`, and the
+`CJ-Access-Token` header. Access tokens last fifteen days and the endpoint that
+mints them is rate limited, so one is held in module scope for as long as Vercel
+keeps the instance warm and refreshed with the refresh token when it is not.
 
 ## The leaderboard
 
@@ -282,7 +366,7 @@ redeploy. Nothing goes in this repository.
 | Variable | Default | |
 |---|---|---|
 | `STRIPE_SECRET_KEY` | — | Required. Use a **restricted** key with read access to Checkout Sessions and nothing else. |
-| `LEADERBOARD_RATE` | `20` | Commission percentage. |
+| `LEADERBOARD_RATE` | `25` | Commission percentage. |
 | `LEADERBOARD_MIN` | `1` | Hide creators below this many orders. |
 
 Until `STRIPE_SECRET_KEY` is set the endpoint answers with an empty board and

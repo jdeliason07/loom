@@ -15,7 +15,7 @@
      STRIPE_SECRET_KEY   required. A RESTRICTED key with read
                          access to Checkout Sessions and nothing
                          else — this function only ever reads.
-     LEADERBOARD_RATE    commission percentage, default 20
+     LEADERBOARD_RATE    commission percentage, default 25
      LEADERBOARD_MIN     hide creators below N orders, default 1
    ============================================================ */
 
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
 
   const key = process.env.STRIPE_SECRET_KEY || "";
-  const rate = Math.min(100, Math.max(0, Number(process.env.LEADERBOARD_RATE ?? 20))) / 100;
+  const rate = Math.min(100, Math.max(0, Number(process.env.LEADERBOARD_RATE ?? 25))) / 100;
   const min = Math.max(1, Number(process.env.LEADERBOARD_MIN ?? 1));
 
   const empty = (reason) => {
