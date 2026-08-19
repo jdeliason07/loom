@@ -37,6 +37,35 @@ window.VATES = {
     paymentLink: "https://buy.stripe.com/test_aFafZh0529pS2Zg34b5Rm00"
   },
 
+  /* The creator programme — everything creators.html needs.
+
+     That page is what a direct message points at once someone says
+     yes. It exists so a mailing address is typed into a form rather
+     than into an Instagram thread, where it becomes a pile of personal
+     data in an inbox with no record of who agreed to what. */
+  creators: {
+    /* Where the form posts. Any endpoint that accepts a plain
+       application/json POST works — Formspree, Basin, Tally, a Vercel
+       function, a Zap. There is no server in this repository, so this
+       is the one piece that has to live somewhere else.
+
+       Leave it empty and the form falls back to opening a pre-filled
+       email to contactEmail below, exactly as an empty paymentLink
+       falls back to the demonstration drawer: an unconfigured page
+       must never swallow something a person typed. */
+    formEndpoint: "",
+
+    /* Where the fallback email goes, and the address of last resort
+       for anyone who cannot use the form at all. */
+    contactEmail: "hello@vates.store",
+
+    /* What the commission actually is, as it should read on the page —
+       "20%", "$10 a bottle", whatever the deal is. Left empty it shows
+       an em dash, on the same rule as the unfilled specs: the page
+       never invents a number that nobody has agreed to. */
+    commission: ""
+  },
+
   /* Paid-ad and creator tracking. Each is optional: an empty string
      means that platform's script is never fetched at all, so unused
      pixels cost nothing. */

@@ -17,6 +17,7 @@ python3 -m http.server 8000   # → http://localhost:8000
 ```
 index.html                     the storefront
 thanks.html                    order confirmation — fires the Purchase event
+creators.html                  the page a creator outreach DM points at
 shipping.html privacy.html terms.html    the three Stripe asks for
 404.html  robots.txt  sitemap.xml  site.webmanifest  favicon.ico
 assets/js/config.js            THE ONLY FILE TO EDIT TO GO LIVE
@@ -27,6 +28,7 @@ assets/img/og.jpg              the 1200x630 share card
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
 assets/js/app.js               the iris, order drawer, cart state, film-to-reel handover
+assets/js/creators.js          the creator form, and its no-endpoint fallback
 assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
 assets/img/reel/01–32.webp     the archive reel of creators, in Who we are
 assets/video/intro.mp4/.webm   the film, framed in Who we are — plays on a tap
@@ -58,6 +60,10 @@ empty and the output directory as the root.
 5. **In hand** — the specs. Height and weight are dashes until the spec sheet
    fills them.
 6. **Footer.**
+
+`creators.html` sits outside that order: it is a plain page, reached from a
+direct message or from the line under the creators wall, never from the
+scroll.
 
 The page scrolls normally. The scroll-snap paging and the wheel driver that
 earlier versions carried are gone with the full-screen reel they served; the
@@ -242,6 +248,56 @@ ask Stripe what was actually charged, so a two-bottle order is still reported as
 $49 — under-reporting, which is the safe direction, and the true figures are in
 Stripe. A webhook into the Conversions API is the fix when the ad spend
 justifies it.
+
+## The creator programme
+
+`creators.html` is the page a micro-influencer outreach DM points at once
+somebody says yes. It states the offer — a bottle, free, nothing owed — the
+commission if they choose to post, and the disclosure obligation that comes
+with taking a gifted product on camera. Then it takes a mailing address.
+
+The mailing address is the reason the page exists. The alternative is asking
+for it in an Instagram thread, which leaves strangers' home addresses sitting
+in a social inbox with no record of what each person agreed to and no way to
+delete one on request. Here the address arrives with its consents attached.
+
+Three checkboxes, and the difference between them is the whole design:
+
+| Box | Required | What it means |
+|---|---|---|
+| Disclosure understood | yes | They know a gifted post has to say it was gifted. Not a preference — FTC and equivalents bind the brand too. |
+| Paid ads / whitelisting | no | Permission to **ask**, later, with terms. Not permission to run anything. |
+| Name and portrait | no | What unlocks a real face on the creators wall, replacing a silhouette. |
+
+The two optional boxes are unticked and stay unticked if nobody touches them:
+`creators.js` records an untouched box as an explicit `"no"` rather than
+letting it go missing, because a record that omits a permission and a record
+that refuses one must not look the same afterwards.
+
+**Where the form goes.** `creators.formEndpoint` in `config.js` takes any URL
+that accepts a JSON POST — Formspree, Basin, Tally, a Vercel function. There
+is no server in this repository, so this is the one piece that has to live
+elsewhere. Leave it empty and the form composes a pre-filled email to
+`creators.contactEmail` instead, on the same principle as the checkout: an
+unconfigured page must never swallow what somebody typed. A failed POST falls
+back the same way, with the fields left filled in.
+
+**The commission** is `creators.commission` — free text, "20%" or "$10 a
+bottle", whatever was agreed. Empty, the page shows an em dash, on the same
+rule as the unfilled height and weight in the specs. The page does not invent
+a rate.
+
+**It is `noindex`.** The page is reached from a DM, not from a search, and
+keeping it out of the index keeps the number of people typing an address into
+it equal to the number of people actually approached. Note that it is *not*
+in `robots.txt`: a crawler has to be allowed to fetch the page in order to
+read the `noindex` telling it to drop the page, so disallowing it would have
+the opposite of the intended effect. It is left out of `sitemap.xml` for the
+same reason it carries `noindex`.
+
+The outreach itself — where to find creators, the DM script, the warm-up, the
+cadence — is in [`OUTREACH.md`](OUTREACH.md), and none of it belongs on the
+site.
 
 ## Knowing which creator sold it
 

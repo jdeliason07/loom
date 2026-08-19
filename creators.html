@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>For creators — vates</title>
+<meta name="description" content="A bottle, sent free, with nothing owed. And a link that pays you if you decide to post it.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#2e251b">
+<link rel="canonical" href="https://loom-one-lime.vercel.app/creators.html">
+
+<!-- This page is reached from a direct message, not from a search. Keeping
+     it out of the index keeps the number of people filling in the form
+     equal to the number of people actually approached, which is the whole
+     of the quality control. It is a one-line change if that stops being
+     what is wanted. -->
+<meta name="robots" content="noindex, follow">
+
+<link rel="icon" href="assets/brand/vates-mark.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+<link rel="stylesheet" href="assets/brand/loom-colors.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="page">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main class="page__main" id="main">
+  <div class="container page__inner">
+
+    <p class="wordmark wordmark--page">
+      <a href="./"><img src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184"></a>
+    </p>
+
+    <h1 class="page__title">For creators</h1>
+    <p class="page__lead">A bottle, sent free, with nothing owed. And if you
+      decide to put it on camera, a link that pays you for what it sells.</p>
+
+    <div class="prose">
+
+      <h2>The offer</h2>
+      <p>We send you No.&thinsp;01 — the whole thing, the bottle we sell for
+        $49, not a sample version of it. It is yours. There is no contract to
+        sign, no minimum number of posts, no approval to wait for, and no
+        invoice if you never mention it. If it turns out not to be your sort of
+        thing, keep it and say nothing. That is a real option and it costs you
+        nothing to take.</p>
+
+      <h2>If you do post it</h2>
+      <p>You get a link of your own — <code>vates.store/?ref=yourhandle</code> —
+        and a commission on everything it sells. The tag on that link is kept
+        in the buyer's browser from the moment they first arrive, so a sale
+        still counts for you if they think about it for a fortnight and come
+        back on their own. It rides through the checkout and lands on the
+        payment itself in our books, next to the money. That is deliberate:
+        whoever pays creators here is reading the payments list, not an
+        analytics dashboard that can quietly disagree with it.</p>
+      <p class="prose__rate">Commission: <strong data-creator-rate>—</strong>
+        of every order the link produces, for as long as it keeps producing
+        them.</p>
+
+      <h2>What we ask</h2>
+      <p>One thing, and it is not negotiable because it is the law rather than
+        our preference: if you post about a bottle we gave you, say that we
+        gave it to you, and if you are using a link that pays you, say that
+        too. <em>#gifted</em>, <em>#ad</em>, "vates sent me this" — the wording
+        is yours, the disclosure is not optional. It has to be visible without
+        tapping "more", and a caption at the end of a description box does not
+        count. This protects you considerably more than it protects us.</p>
+      <p>Beyond that: nothing. No brief, no talking points, no shot list, no
+        draft for us to approve. If we wanted the video we would have made it
+        ourselves, and it would have been worse.</p>
+
+      <h2>Your video in our advertising</h2>
+      <p>Separately, and only if you want to: we sometimes pay to run a
+        creator's own video as an advert, or run it from your handle rather
+        than ours. That is a different thing from posting on your own account,
+        it is worth more than a commission, and it is not covered by us having
+        sent you a bottle. There is a box for it below. Leaving it unticked
+        changes nothing else about any of the above, and we will not ask
+        again.</p>
+      <p>If you tick it we will come back to you with the terms — how long,
+        which platforms, what it pays — before anything runs. Ticking a box on
+        a web form is us being allowed to <em>ask</em>, not us being allowed to
+        publish.</p>
+
+      <h2>The same goes for your face</h2>
+      <p>The front page carries a wall of creators who use the bottle. Every
+        square on it is a silhouette and a made-up name today, and it says so
+        underneath, because we will not imply an endorsement that nobody has
+        given. A real name and a real portrait go up there when the person in
+        them has said we may, and come down the day they say otherwise.</p>
+
+    </div>
+
+    <!-- ── The form ──────────────────────────────────────────────
+         Posts to creators.formEndpoint in config.js. With no endpoint
+         set it falls back to opening a pre-filled email instead, on the
+         same principle as the checkout: an unconfigured page must never
+         present a button that silently drops what somebody typed. -->
+    <form class="cform" id="creator-form" novalidate>
+      <h2 class="cform__title">Send me one</h2>
+      <p class="cform__note">Everything except the address is so we know who we
+        are talking to. The address is so the parcel arrives.</p>
+
+      <div class="cform__row">
+        <div class="field">
+          <label for="cf-name">Your name</label>
+          <input id="cf-name" name="name" type="text" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="cf-email">Email</label>
+          <input id="cf-email" name="email" type="email" autocomplete="email" required>
+        </div>
+      </div>
+
+      <div class="cform__row">
+        <div class="field">
+          <label for="cf-handle">Handle</label>
+          <input id="cf-handle" name="handle" type="text" placeholder="@yourhandle" required>
+        </div>
+        <div class="field">
+          <label for="cf-platform">Mainly on</label>
+          <select id="cf-platform" name="platform">
+            <option>Instagram</option>
+            <option>TikTok</option>
+            <option>YouTube</option>
+            <option>Somewhere else</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="cf-address">Where to send it</label>
+        <textarea id="cf-address" name="address" rows="4" autocomplete="street-address"
+                  placeholder="Name, street, city, postcode, country" required></textarea>
+      </div>
+
+      <fieldset class="consents">
+        <legend class="label">Before you send this</legend>
+
+        <label class="consent">
+          <input type="checkbox" name="disclosure" value="yes" required>
+          <span>I understand that if I post about the bottle I have to say it
+            was gifted, and that a link that pays me has to be disclosed
+            too.</span>
+        </label>
+
+        <label class="consent">
+          <input type="checkbox" name="ugc" value="yes">
+          <span><strong>Optional.</strong> You may contact me about paying to
+            run one of my videos as an advert, or running it from my handle.
+            Terms to be agreed separately before anything goes live.</span>
+        </label>
+
+        <label class="consent">
+          <input type="checkbox" name="portrait" value="yes">
+          <span><strong>Optional.</strong> You may put my name and photograph
+            on the creators wall on the front page, until I ask you to take it
+            down.</span>
+        </label>
+      </fieldset>
+
+      <button type="submit" class="btn btn--primary btn--block" id="cf-submit">Send it my way</button>
+      <p class="cform__status" id="cf-status" role="status" hidden></p>
+      <p class="cform__fineprint">Your address is used to post one parcel and
+        nothing else. It is not added to a mailing list and it is not passed to
+        anyone but the courier. Ask and it is deleted —
+        <a href="privacy.html">Privacy</a>.</p>
+    </form>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__meta">&copy; <span id="year">2026</span> vates</p>
+    <p class="site-footer__links">
+      <a href="./">The bottle</a>
+      <a href="creators.html">For creators</a>
+      <a href="shipping.html">Shipping &amp; returns</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/creators.js"></script>
+<script>document.getElementById("year").textContent = String(new Date().getFullYear());</script>
+
+</body>
+</html>
