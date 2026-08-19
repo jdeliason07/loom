@@ -17,7 +17,7 @@ python3 -m http.server 8000   # → http://localhost:8000
 ```
 index.html                     the storefront
 thanks.html                    order confirmation — fires the Purchase event
-creators.html                  the page a creator outreach DM points at
+leaderboard.html               what each creator has earned, ranked
 shipping.html privacy.html terms.html    the three Stripe asks for
 404.html  robots.txt  sitemap.xml  site.webmanifest  favicon.ico
 assets/js/config.js            THE ONLY FILE TO EDIT TO GO LIVE
@@ -28,7 +28,8 @@ assets/img/og.jpg              the 1200x630 share card
 assets/brand/loom-colors.css   the brand color system — imported first, unmodified
 assets/css/styles.css          storefront styles
 assets/js/app.js               the iris, order drawer, cart state, film-to-reel handover
-assets/js/creators.js          the creator form, and its no-endpoint fallback
+assets/js/leaderboard.js       draws the leaderboard from the generated JSON
+tools/leaderboard.mjs          builds that JSON from Stripe — run locally, needs the key
 assets/brand/vates-*.svg       the wordmark, and the "v" cropped square for the favicon
 assets/img/reel/01–32.webp     the archive reel of creators, in Who we are
 assets/video/intro.mp4/.webm   the film, framed in Who we are — plays on a tap
@@ -61,9 +62,7 @@ empty and the output directory as the root.
    fills them.
 6. **Footer.**
 
-`creators.html` sits outside that order: it is a plain page, reached from a
-direct message or from the line under the creators wall, never from the
-scroll.
+`leaderboard.html` sits outside that order, as a plain page.
 
 The page scrolls normally. The scroll-snap paging and the wheel driver that
 earlier versions carried are gone with the full-screen reel they served; the
@@ -249,55 +248,62 @@ $49 — under-reporting, which is the safe direction, and the true figures are i
 Stripe. A webhook into the Conversions API is the fix when the ad spend
 justifies it.
 
-## The creator programme
+## The leaderboard
 
-`creators.html` is the page a micro-influencer outreach DM points at once
-somebody says yes. It states the offer — a bottle, free, nothing owed — the
-commission if they choose to post, and the disclosure obligation that comes
-with taking a gifted product on camera. Then it takes a mailing address.
+`leaderboard.html` shows what each creator has earned, ranked. It is public,
+and the line under it points people at the Instagram and TikTok accounts to
+ask about joining.
 
-The mailing address is the reason the page exists. The alternative is asking
-for it in an Instagram thread, which leaves strangers' home addresses sitting
-in a social inbox with no record of what each person agreed to and no way to
-delete one on request. Here the address arrives with its consents attached.
+The page reads `assets/data/leaderboard.json` and nothing else. That file is
+**generated, not written by hand**, and it is not in the repository until
+somebody generates it — the page treats a missing file as "no sales yet"
+rather than an error, which is the state it ships in.
 
-Three checkboxes, and the difference between them is the whole design:
+### Why it is not live
 
-| Box | Required | What it means |
+A Stripe secret key can read every customer's name, address and email, issue
+refunds, and change where payouts land. This site is served straight from the
+repository with no server in front of it, so anything the page could use to
+call Stripe, a visitor could read out of view-source. There is no version of
+"query Stripe from the browser" that is safe, so the query happens elsewhere
+and the site only ever sees the totals.
+
+### Generating it
+
+```sh
+STRIPE_SECRET_KEY=sk_live_… node tools/leaderboard.mjs --rate=20
+git add assets/data/leaderboard.json && git commit -m "Recount the leaderboard"
+```
+
+Use a **restricted key** with read access to Checkout Sessions and nothing
+else. The script only ever reads, so a key that can do more than read is a key
+that can be misused for no benefit. `.env` is gitignored; the key must never be
+committed.
+
+| Flag | Default | |
 |---|---|---|
-| Disclosure understood | yes | They know a gifted post has to say it was gifted. Not a preference — FTC and equivalents bind the brand too. |
-| Paid ads / whitelisting | no | Permission to **ask**, later, with terms. Not permission to run anything. |
-| Name and portrait | no | What unlocks a real face on the creators wall, replacing a silhouette. |
+| `--rate=20` | 20 | Commission percentage. |
+| `--since=2026-01-01` | all time | Ignore sessions before this date. |
+| `--min=1` | 1 | Hide creators below this many orders. |
+| `--out=PATH` | `assets/data/leaderboard.json` | |
+| `--dry` | off | Print the table, write nothing. |
 
-The two optional boxes are unticked and stay unticked if nobody touches them:
-`creators.js` records an untouched box as an explicit `"no"` rather than
-letting it go missing, because a record that omits a permission and a record
-that refuses one must not look the same afterwards.
+It reads **Checkout Sessions**, not Charges. `client_reference_id` — the token
+`track.js` builds — lives on the session and is not copied onto the
+PaymentIntent or the Charge, so the payments list is the wrong end to read it
+from. Refunds are deducted (the charge is expanded for `amount_refunded`, so a
+refunded order earns nobody a commission), and sessions that completed without
+being paid are skipped.
 
-**Where the form goes.** `creators.formEndpoint` in `config.js` takes any URL
-that accepts a JSON POST — Formspree, Basin, Tally, a Vercel function. There
-is no server in this repository, so this is the one piece that has to live
-elsewhere. Leave it empty and the form composes a pre-filled email to
-`creators.contactEmail` instead, on the same principle as the checkout: an
-unconfigured page must never swallow what somebody typed. A failed POST falls
-back the same way, with the fields left filled in.
+The JSON holds handles, order counts and totals. No customer data of any kind
+goes into it, which is what makes it safe to commit and serve.
 
-**The commission** is `creators.commission` — free text, "20%" or "$10 a
-bottle", whatever was agreed. Empty, the page shows an em dash, on the same
-rule as the unfilled height and weight in the specs. The page does not invent
-a rate.
+### What the handle is
 
-**It is `noindex`.** The page is reached from a DM, not from a search, and
-keeping it out of the index keeps the number of people typing an address into
-it equal to the number of people actually approached. Note that it is *not*
-in `robots.txt`: a crawler has to be allowed to fetch the page in order to
-read the `noindex` telling it to drop the page, so disallowing it would have
-the opposite of the intended effect. It is left out of `sitemap.xml` for the
-same reason it carries `noindex`.
-
-The outreach itself — where to find creators, the DM script, the warm-up, the
-cadence — is in [`OUTREACH.md`](OUTREACH.md), and none of it belongs on the
-site.
+A label chosen when the link was minted, not a verified account. `?ref=janedoe`
+is an arbitrary string; using someone's handle is a convention that makes the
+payments list readable. The page renders it as plain text and never links it to
+a profile, because nothing here has checked that the profile is theirs.
 
 ## Knowing which creator sold it
 

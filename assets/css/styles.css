@@ -588,84 +588,75 @@ a { color: var(--ink-2); }
 .page .site-footer__meta { margin-top: 0; }
 .page .page__main { padding-bottom: clamp(2.5rem, 6vw, 4rem); }
 
-/* ── The creator form ───────────────────────────────────────
-   creators.html only. Fields sit on the elevated panel so the
-   form reads as a distinct object on the page rather than more
-   prose, and every control shares one border colour so the
-   grid of them stays quiet. */
-.prose code {
-  font-size: 0.92em;
-  padding: 0.1em 0.35em;
-  border-radius: var(--radius-sm);
-  background: var(--panel);
-  color: var(--ink);
+/* ── The leaderboard ────────────────────────────────────────
+   leaderboard.html only. A table rather than a grid of cards:
+   the whole point is comparing one column down its length. */
+.vh {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
 }
-.prose__rate { color: var(--ink); }
-.prose__rate strong { font-weight: 600; }
 
-.cform {
-  margin-top: clamp(2.5rem, 6vw, 4rem);
-  padding: clamp(1.5rem, 4vw, 2.25rem);
-  border: 1px solid var(--line);
+.board { margin-top: clamp(2rem, 5vw, 3rem); }
+.board__state {
+  padding: clamp(1.75rem, 5vw, 2.75rem);
+  border: 1px dashed var(--line);
   border-radius: var(--radius-lg);
-  background: var(--panel);
+  color: var(--ink-3);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  text-align: center;
 }
-.cform__title { font-size: clamp(1.3rem, 3vw, 1.6rem); font-weight: 500; line-height: 1.2; }
-.cform__note { margin-top: 0.6rem; font-size: 0.9rem; color: var(--ink-3); }
 
-.cform__row { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
-.cform__row + .cform__row, .cform__row + .field, .field + .field { margin-top: 1rem; }
-/* …but two fields sharing a row are columns, not stacked blocks:
-   the sibling margin above would drop the right-hand one by 1rem
-   and knock the two labels off the same line. */
-.cform__row > .field + .field { margin-top: 0; }
-.cform .cform__row:first-of-type { margin-top: clamp(1.5rem, 3vw, 2rem); }
-
-.field { display: grid; gap: 0.4rem; min-width: 0; }
-.field label {
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+.board__table { width: 100%; border-collapse: collapse; }
+.board__table thead th {
+  padding: 0 0 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-3);
+  text-align: left;
+  border-bottom: 1px solid var(--line);
 }
-.field input, .field select, .field textarea {
-  width: 100%;
-  padding: 0.7rem 0.8rem;
-  font: inherit;
-  font-size: 0.98rem;
-  color: var(--ink);
-  background: var(--ground-deep);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-}
-.field textarea { resize: vertical; line-height: 1.5; }
-.field input::placeholder, .field textarea::placeholder { color: var(--ink-3); }
-
-.consents { margin-top: 1.6rem; border: 0; padding: 0; }
-.consents legend { color: var(--ink-3); padding: 0; }
-.consent {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.7rem;
-  align-items: start;
-  margin-top: 0.9rem;
-  font-size: 0.9rem;
-  line-height: 1.55;
+.board__table tbody td {
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: clamp(0.95rem, 2.2vw, 1.05rem);
   color: var(--ink-2);
-  cursor: pointer;
+  vertical-align: baseline;
 }
-.consent input { margin-top: 0.25rem; width: 1rem; height: 1rem; accent-color: var(--accent); }
-.consent strong { color: var(--ink); font-weight: 600; }
+.board__table tbody tr:last-child td { border-bottom: 0; }
 
-.cform button[type="submit"] { margin-top: 1.75rem; }
+.board__rank {
+  width: 2.5rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.board__who { color: var(--ink); font-weight: 500; }
+.board__num { text-align: right; font-variant-numeric: tabular-nums; }
+.board__earned { color: var(--ink); font-weight: 600; }
 
-.cform__status { margin-top: 0.9rem; font-size: 0.9rem; color: var(--ink-2); }
-.cform__status.is-bad { color: #e3873d; }
-.cform__fineprint { margin-top: 1.1rem; font-size: 0.8rem; line-height: 1.6; color: var(--ink-3); }
-.cform__fineprint a { color: var(--ink-2); }
+/* The top three carry the accent, which is the only ornament the
+   table gets — a medal column would be one more thing to read. */
+.board__table tbody tr.is-top .board__rank,
+.board__table tbody tr.is-top .board__earned { color: var(--accent); }
 
-@media (max-width: 560px) {
-  .cform__row { grid-template-columns: 1fr; }
+.board__updated { margin-top: 1rem; font-size: 0.8rem; color: var(--ink-3); }
+
+.board__join {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-top: clamp(1.25rem, 3vw, 1.75rem);
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+.board__join a { color: var(--ink-2); }
+
+@media (max-width: 460px) {
+  .board__table thead th { font-size: 0.65rem; letter-spacing: 0.12em; }
+  .board__rank { width: 1.75rem; }
 }
 
 /* ── Footer ─────────────────────────────────────────────────── */

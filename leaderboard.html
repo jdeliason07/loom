@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Creator leaderboard — vates</title>
+<meta name="description" content="What the people selling No. 01 have earned.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#2e251b">
+<link rel="canonical" href="https://loom-one-lime.vercel.app/leaderboard.html">
+
+<link rel="icon" href="assets/brand/vates-mark.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+<link rel="stylesheet" href="assets/brand/loom-colors.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="page">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<main class="page__main" id="main">
+  <div class="container page__inner">
+
+    <p class="wordmark wordmark--page">
+      <a href="./"><img src="assets/brand/vates-wordmark.svg" alt="vates" width="893" height="184"></a>
+    </p>
+
+    <h1 class="page__title">Leaderboard</h1>
+    <p class="page__lead">What the people selling No.&thinsp;01 have earned.
+      Straight from the payments, refunds already taken off.</p>
+
+    <!-- Filled by leaderboard.js from assets/data/leaderboard.json, which
+         tools/leaderboard.mjs writes. Static: the JSON is generated on
+         somebody's machine and committed, because a page served from a
+         repository has nowhere to keep a Stripe key that visitors
+         cannot read. -->
+    <div class="board" id="board">
+      <p class="board__state" id="board-state">Loading…</p>
+
+      <table class="board__table" id="board-table" hidden>
+        <thead>
+          <tr>
+            <th scope="col" class="board__rank"><span class="vh">Rank</span></th>
+            <th scope="col">Creator</th>
+            <th scope="col" class="board__num">Orders</th>
+            <th scope="col" class="board__num">Earned</th>
+          </tr>
+        </thead>
+        <tbody id="board-rows"></tbody>
+      </table>
+
+      <p class="board__updated" id="board-updated" hidden></p>
+    </div>
+
+    <p class="board__join">
+      Want to be on it? DM us on Instagram
+      <a href="https://instagram.com/vates" rel="noopener">@vates</a>
+      or TikTok <a href="https://tiktok.com/@.vates" rel="noopener">@.vates</a>.
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__meta">&copy; <span id="year">2026</span> vates</p>
+    <p class="site-footer__links">
+      <a href="./">The bottle</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="shipping.html">Shipping &amp; returns</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/leaderboard.js"></script>
+<script>document.getElementById("year").textContent = String(new Date().getFullYear());</script>
+
+</body>
+</html>

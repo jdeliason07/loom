@@ -3,8 +3,8 @@
 The operational half of the micro-influencer plan. None of this is on the
 website and none of it should be — a storefront that explains its own
 acquisition strategy to its customers is a strange thing to build. The one
-piece that *is* on the website is `creators.html`, and it exists because
-step 3 below needs somewhere to point.
+piece that *is* on the website is `leaderboard.html` — what each creator has
+earned, with a line pointing at the DMs for anyone who wants to join.
 
 ## What the site already does for this
 
@@ -16,8 +16,9 @@ Two things were built before this document and neither needs replacing:
   list is how creators get paid. See "Knowing which creator sold it" in the
   README.
 - **The honesty rule on the creators wall.** Every face in "Trusted by" is a
-  silhouette until a real person has said we may use theirs. The optional
-  portrait box on `creators.html` is how that permission arrives.
+  silhouette until a real person has said we may use theirs. That permission
+  has to be asked for and recorded somewhere — there is no form for it now,
+  so it happens in the DM and needs keeping.
 
 **UpPromote and Shopify Collabs do not apply here.** Both are Shopify apps
 and this is a static site on a Stripe Payment Link — there is no Shopify
@@ -56,13 +57,12 @@ payouts, and those stay manual until the volume hurts.
    > anything it sells, but that's your call to make after it turns up, not a
    > condition of getting one.
    >
-   > Everything's here if you want it: vates.store/creators.html
+   > Here's what people are making so far: vates.store/leaderboard.html
 
-   The link is the whole point of the last line. **Do not collect mailing
-   addresses in a DM thread.** An Instagram inbox full of strangers' home
-   addresses is a pile of personal data with no record of who agreed to
-   what, no deletion path, and nothing to show a regulator. The form exists
-   so the address arrives somewhere with the consent boxes attached to it.
+   Addresses now come back in the DM thread, since the form is gone. That
+   leaves strangers' home addresses sitting in a social inbox — worth moving
+   into whatever you actually keep records in, and deleting from the thread,
+   rather than letting it accumulate.
 
 4. **Ship it.** No platform to sign up for, no account to create, no
    contract to read before a sample. Product first.
@@ -85,10 +85,11 @@ connection and it has to be disclosed — this is FTC law in the US and
 comparable rules elsewhere, and it binds the brand as well as the creator.
 The same goes for an affiliate link that pays them.
 
-So: say it in the DM, say it on `creators.html` (there is a required
-checkbox), and say it again in the follow-up. A creator who buries `#ad` at
-the end of a description box has not disclosed. This is the one place in the
-whole sequence where "keep it low-friction" loses, and it loses on purpose.
+With the form gone there is no longer a checkbox recording that anyone was
+told, so it has to be said in the DM and said again in the follow-up, and the
+thread is the only record that it was. A creator who buries `#ad` at the end
+of a description box has not disclosed. This is the one place in the whole
+sequence where "keep it low-friction" loses, and it loses on purpose.
 
 ## On volume
 
