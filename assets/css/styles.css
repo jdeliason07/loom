@@ -559,8 +559,11 @@ a { color: var(--ink-2); }
   position: relative;
   width: auto;
   height: min(52vh, 470px);
-  filter: drop-shadow(0 34px 44px rgba(0, 0, 0, 0.5));
-  border-radius: 6px;
+  /* The bottle is cut out, so this traces the glass rather than a photo's
+     rectangle — which is also why there is no corner radius any more:
+     there is no edge left to soften. Softened and dropped closer than a
+     photograph's shadow, since it now reads as the object's own. */
+  filter: drop-shadow(0 26px 38px rgba(0, 0, 0, 0.55));
 }
 .product__variants {
   position: relative;
@@ -1039,10 +1042,13 @@ a { color: var(--ink-2); }
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  aspect-ratio: 58 / 198;
+  /* The bottle's own proportions. Cropping it to a frame of any other
+     shape took the cap off the top and the embossing off the base. */
+  aspect-ratio: 345 / 1222;
   overflow: hidden;
+  padding: 0.35rem 0;
 }
-.line-item__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.line-item__thumb img { width: 100%; height: 100%; object-fit: contain; }
 
 .line-item__head {
   display: flex;
