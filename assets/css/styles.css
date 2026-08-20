@@ -387,6 +387,16 @@ a { color: var(--ink-2); }
    because the two halves are one movement. */
 .bridge { padding-block: var(--section-y) calc(var(--section-y) * 0.5); }
 .bridge__inner { display: grid; justify-items: center; text-align: center; }
+
+/* Opens the section, and pairs with "Meet No. 01" closing it — the two
+   accent lines bracket the three in between. */
+.bridge__eyebrow {
+  margin-bottom: clamp(0.9rem, 2vw, 1.3rem);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
 .bridge__title {
   font-family: var(--font-display);
   font-weight: 480;
@@ -394,6 +404,7 @@ a { color: var(--ink-2); }
   line-height: 1.1;
   letter-spacing: -0.015em;
   text-wrap: balance;
+  max-width: 18ch;
 }
 .bridge__line {
   margin-top: 0.9rem;
@@ -402,6 +413,18 @@ a { color: var(--ink-2); }
   color: var(--ink-2);
 }
 .bridge__line:first-of-type { margin-top: clamp(1.6rem, 3.5vh, 2.4rem); }
+
+/* A hairline between each of the three, so they read as three separate
+   thoughts rather than one wrapped paragraph. On the line rather than
+   between elements, so there is nothing to keep in step if one moves. */
+.bridge__line + .bridge__line::before {
+  content: "";
+  display: block;
+  width: 1.75rem;
+  height: 1px;
+  margin: 0 auto 0.9rem;
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
 .bridge__meet {
   margin-top: clamp(2rem, 4.5vh, 3rem);
   font-size: 0.78rem;
