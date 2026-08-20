@@ -339,20 +339,44 @@ a { color: var(--ink-2); }
 }
 .about__body + .about__body { margin-top: 0.8rem; }
 
-/* The three "the ones who…" lines read as a stanza, so they are set
-   closer than prose and a shade brighter than the lines around them. */
+/* The three "if you…" lines are the address to the reader and the heart
+   of the letter, so they carry more weight than body copy: a size up,
+   the leading opened, and balanced wrapping so a line that runs over
+   breaks evenly instead of leaving one word stranded. */
 .about__body--creed {
-  margin-top: 1.6rem;
+  margin-top: clamp(1.8rem, 4vw, 2.6rem);
+  /* Wide enough that the longest of the three sits on one line at any
+     desktop width — cut shorter, the second line stranded "yet." on a
+     line of its own, which broke the rhythm the anaphora depends on. */
+  max-width: 62ch;
+  font-size: clamp(1.05rem, 1.9vw, 1.22rem);
   line-height: 1.9;
   color: var(--ink);
+  text-wrap: balance;
 }
+
+/* The answer to those three lines, so it lifts into the serif. */
 .about__body--close {
-  margin-top: 1.6rem;
+  margin-top: clamp(1.6rem, 3.5vw, 2.2rem);
   font-family: var(--font-display);
   font-weight: 480;
-  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  font-size: clamp(1.3rem, 2.6vw, 1.8rem);
   line-height: 1.4;
   color: var(--ink);
+  text-wrap: balance;
+}
+
+/* The sign-off. A letter ends with a name, so this sits apart from the
+   message above it and quieter than everything else in the section. */
+.about__signature {
+  margin: clamp(2rem, 4.5vw, 3rem) auto 0;
+  padding-top: clamp(1.2rem, 2.6vw, 1.7rem);
+  border-top: 1px solid var(--line);
+  width: min(52ch, 100%);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink-3);
+  text-wrap: balance;
 }
 
 /* ── The bridge: vision to vessel ───────────────────────────
